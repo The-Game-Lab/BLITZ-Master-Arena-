@@ -9,7 +9,7 @@
     <style>
         body { margin: 0; overflow: hidden; background: #050811; font-family: 'Rajdhani', sans-serif; user-select: none; }
         .font-orbitron { font-family: 'Orbitron', sans-serif; }
-        canvas { display: block; width: 100vw; height: 100vh; }
+        canvas { display: block; width: 100vw; height: 100vh; cursor: crosshair; }
         .cyber-panel { background: rgba(15, 23, 42, 0.94); border: 2px solid rgba(0, 240, 255, 0.4); box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); backdrop-blur: blur(14px); }
         .cyber-button { background: linear-gradient(135deg, #00f0ff 0%, #3b82f6 100%); color: #03050c; font-family: 'Orbitron', sans-serif; font-weight: 900; transition: all 0.2s; box-shadow: 0 0 20px rgba(0, 240, 255, 0.5); cursor: pointer; }
         .cyber-button:hover { transform: scale(1.04); box-shadow: 0 0 30px rgba(0, 240, 255, 0.85); }
@@ -42,47 +42,21 @@
             </div>
 
             <!-- Central Game Mode / Wave Title -->
-            <div class="cyber-panel rounded-2xl px-8 py-3 flex flex-col items-center border-yellow-500/60 shadow-[0_0_30px_rgba(234,179,8,0.25)]">
-                <span id="hud-match-title" class="font-orbitron font-black text-xl text-yellow-400 tracking-wider">SANDBOX ARENA</span>
-                <span id="hud-quest-tracker" class="text-xs font-bold text-cyan-300 mt-0.5">Versla vijanden en word de sterkste!</span>
-            </div>
-
-            <!-- Menu / Shop Buttons -->
-            <div class="flex gap-3 pointer-events-auto">
-                <button type="button" onclick="openWeaponsModal()" class="cyber-button px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5">
-                    <span>⚔️ ARSENAL & SHOP</span>
-                </button>
-                <button type="button" onclick="openSettingsModal()" class="bg-slate-800 hover:bg-slate-700 border border-cyan-500/50 text-cyan-300 px-4 py-2.5 rounded-xl text-xs font-orbitron font-bold transition">
-                    ⚙️ SETTINGS
-                </button>
-            </div>
-
+        <div class="cyber-panel rounded-2xl px-8 py-3 flex flex-col items-center border-yellow-500/60 shadow-[0_0_30px_rgba(234,179,8,0.25)]">
+            <span id="hud-match-title" class="font-orbitron font-black text-xl text-yellow-400 tracking-wider">ARENA BATTLE</span>
+            <span id="hud-quest-tracker" class="text-xs font-bold text-cyan-300 mt-0.5">Versla de vijanden!</span>
         </div>
 
-        <!-- Center Floating Announcements -->
-        <div class="flex flex-col items-center justify-center pointer-events-none">
-            <div id="announcement" class="font-orbitron font-black text-4xl text-yellow-400 drop-shadow-[0_0_20px_rgba(234,179,8,0.9)] opacity-0 transition-opacity duration-150 text-center">
-                WAVE CLEARED!
-            </div>
-        </div>
-
-        <!-- Bottom Controls Info -->
-        <div class="flex justify-between items-end w-full max-w-7xl mx-auto">
-            <div class="cyber-panel rounded-xl p-3 text-xs text-gray-300 pointer-events-auto">
-                <div class="font-bold text-cyan-400 mb-0.5 font-orbitron">BESTURING</div>
-                <div><span class="text-yellow-400 font-bold" id="ctrl-move">WASD / Pijltjes</span>: Vrij Bewegen (Omhoog/Omlaag/Links/Rechts)</div>
-                <div><span class="text-yellow-400 font-bold" id="ctrl-atk">Linksklik / M1 / L</span>: Aanvallen / Zwaard Slash</div>
-            </div>
-            
-            <div class="cyber-panel rounded-xl p-3 text-xs text-gray-300 pointer-events-auto text-right">
-                <div class="font-bold text-yellow-400 mb-0.5 font-orbitron">TIP</div>
-                <div>Versla vijanden om direct krachtige upgrades te kiezen!</div>
-            </div>
+        <!-- Clean Menu (Shop & Sandbox knoppen weg tijdens gameplay) -->
+        <div class="flex gap-3 pointer-events-auto">
+            <button type="button" onclick="openSettingsModal()" class="bg-slate-800 hover:bg-slate-700 border border-cyan-500/50 text-cyan-300 px-4 py-2.5 rounded-xl text-xs font-orbitron font-bold transition">
+                ⚙️ SETTINGS
+            </button>
         </div>
 
     </div>
 
-    <!-- MAIN MENU MODAL (Shop & Arsenal as First Priority Button) -->
+    <!-- MAIN MENU MODAL -->
     <div id="main-menu-modal" class="absolute inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-xl p-6 pointer-events-auto">
         <div class="cyber-panel p-10 rounded-3xl w-full max-w-lg flex flex-col gap-5 text-center shadow-[0_0_80px_rgba(0,240,255,0.4)] border-2 border-cyan-400">
             <div>
@@ -91,12 +65,10 @@
             </div>
 
             <div class="flex flex-col gap-3 text-left">
-                <!-- Shop & Arsenal Direct Access First -->
                 <button type="button" onclick="openWeaponsModal()" class="cyber-button w-full py-3.5 rounded-2xl text-xs flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(0,240,255,0.5)]">
                     <span>⚔️ ARSENAL & SHOP (UPGRADES & SKINS)</span>
                 </button>
 
-                <!-- Single Game Mode Selector -->
                 <div>
                     <label class="text-[11px] font-orbitron text-cyan-400 font-bold mb-1 block">SPELMODUS:</label>
                     <div class="grid grid-cols-2 gap-2">
@@ -105,7 +77,6 @@
                     </div>
                 </div>
 
-                <!-- Lobby Code & Friends System -->
                 <div class="bg-slate-900/80 p-3 rounded-2xl border border-cyan-500/30 space-y-3">
                     <div class="flex justify-between items-center">
                         <span class="text-xs font-orbitron text-cyan-300 font-bold">LOBBY CODE:</span>
@@ -114,11 +85,6 @@
                             <button type="button" onclick="joinLobbyByCode()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-3 py-1 rounded-lg text-xs font-orbitron font-bold">JOIN</button>
                         </div>
                     </div>
-                    <div class="flex justify-between items-center border-t border-slate-800 pt-2">
-                        <span class="text-xs font-orbitron text-gray-300 font-bold">VRIENDEN (ONLINE):</span>
-                        <button type="button" onclick="openFriendsModal()" class="bg-slate-800 hover:bg-slate-700 text-cyan-300 px-3 py-1 rounded-lg text-xs font-orbitron">BEHEER VRIENDEN</button>
-                    </div>
-                    <div id="lobby-status-text" class="text-[11px] text-emerald-400 font-orbitron text-center">Eigen Lobby Actief (Code: <span id="current-lobby-code">BLITZ-1</span>)</div>
                 </div>
 
                 <button type="button" onclick="startGame()" class="cyber-button w-full py-4 rounded-2xl text-base flex items-center justify-center gap-2 mt-1">
@@ -128,24 +94,7 @@
         </div>
     </div>
 
-    <!-- FRIENDS & INVITE MODAL -->
-    <div id="friends-modal" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-6 pointer-events-auto">
-        <div class="cyber-panel p-8 rounded-3xl w-full max-w-md flex flex-col gap-5">
-            <h2 class="font-orbitron font-bold text-lg text-cyan-400 text-center">VRIENDEN & UITNODIGINGEN</h2>
-            <div class="space-y-2">
-                <div class="flex gap-2">
-                    <input type="text" id="friend-name-input" placeholder="Vriend gebruikersnaam..." class="flex-1 bg-slate-900 border border-cyan-500/50 rounded-xl px-3 py-2 text-xs text-white" />
-                    <button type="button" onclick="addFriend()" class="cyber-button px-4 py-2 rounded-xl text-xs">VOEG TOE</button>
-                </div>
-            </div>
-            <div id="friends-list-container" class="space-y-2 max-h-52 overflow-y-auto pr-1">
-                <!-- Dynamic friends list -->
-            </div>
-            <button type="button" onclick="closeFriendsModal()" class="cyber-button w-full py-3 rounded-xl text-xs">SLUITEN</button>
-        </div>
-    </div>
-
-    <!-- ARSENAL & SHOP MODAL (10 Weapons + Skins Tab) -->
+    <!-- ARSENAL & SHOP MODAL -->
     <div id="weapons-modal" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-6 pointer-events-auto">
         <div class="cyber-panel p-8 rounded-3xl w-full max-w-3xl flex flex-col gap-5 relative pointer-events-auto">
             <div class="flex justify-between items-center">
@@ -177,15 +126,6 @@
                     </div>
                     <span class="text-yellow-400 font-bold text-lg">⚔️</span>
                 </button>
-
-                <button type="button" onclick="applyKillUpgrade('speed')" class="bg-slate-900 border border-cyan-500/60 hover:border-yellow-400 p-4 rounded-2xl transition cursor-pointer flex justify-between items-center">
-                    <div>
-                        <div class="font-orbitron font-bold text-sm text-cyan-300">💨 SPEED & DASH BOOST</div>
-                        <div class="text-xs text-gray-400 mt-0.5">Verhoog je bewegingssnelheid en dash-cooldown.</div>
-                    </div>
-                    <span class="text-cyan-400 font-bold text-lg">🏃</span>
-                </button>
-
                 <button type="button" onclick="applyKillUpgrade('heal')" class="bg-slate-900 border border-cyan-500/60 hover:border-yellow-400 p-4 rounded-2xl transition cursor-pointer flex justify-between items-center">
                     <div>
                         <div class="font-orbitron font-bold text-sm text-cyan-300">❤️ VOLLEDIG HERSTEL + MAX HP</div>
@@ -193,19 +133,11 @@
                     </div>
                     <span class="text-emerald-400 font-bold text-lg">🛡️</span>
                 </button>
-
-                <button type="button" onclick="applyKillUpgrade('coins')" class="bg-slate-900 border border-cyan-500/60 hover:border-yellow-400 p-4 rounded-2xl transition cursor-pointer flex justify-between items-center">
-                    <div>
-                        <div class="font-orbitron font-bold text-sm text-cyan-300">🪙 BONUS COINS (+100)</div>
-                        <div class="text-xs text-gray-400 mt-0.5">Ontvang direct 100 extra coins voor de shop.</div>
-                    </div>
-                    <span class="text-yellow-400 font-bold text-lg">💰</span>
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- GAME OVER / RESPAWN MODAL -->
+    <!-- GAME OVER MODAL -->
     <div id="game-over-modal" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-slate-950/90 backdrop-blur-lg p-6 pointer-events-auto">
         <div class="cyber-panel p-8 rounded-3xl w-full max-w-md flex flex-col gap-5 text-center border-2 border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.4)]">
             <h2 class="font-orbitron font-black text-4xl text-red-500 tracking-wider">GAME OVER</h2>
@@ -213,7 +145,6 @@
                 <div>Kills dit potje: <span id="game-over-pot-kills" class="font-bold text-yellow-400">0</span></div>
                 <div>Totale Kills: <span id="game-over-total-kills" class="font-bold text-cyan-400">0</span></div>
             </div>
-
             <div class="flex flex-col gap-3 mt-2">
                 <button type="button" onclick="respawnPlayer()" class="cyber-button w-full py-4 rounded-2xl text-base">RESPAWN</button>
                 <button type="button" onclick="returnToMainMenu()" class="bg-slate-800 hover:bg-slate-700 text-gray-300 font-orbitron font-bold py-3 rounded-xl transition">HOOFDMENU</button>
@@ -225,18 +156,12 @@
     <div id="settings-modal" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-6 pointer-events-auto">
         <div class="cyber-panel p-8 rounded-3xl w-full max-w-md flex flex-col gap-5 relative">
             <h2 class="font-orbitron font-bold text-xl text-cyan-400 text-center">SETTINGS & KEYBINDS</h2>
-            
             <div class="space-y-4 text-xs font-orbitron">
-                <div class="flex justify-between items-center">
-                    <span>Aanval / Vuur (M1 Key):</span>
-                    <input type="text" id="bind-attack" value="KeyL" maxlength="5" class="bg-slate-900 border border-cyan-500/50 rounded-lg px-3 py-1.5 text-yellow-400 text-center w-28 uppercase" />
-                </div>
                 <div class="flex justify-between items-center">
                     <span>Dash Key:</span>
                     <input type="text" id="bind-dash" value="Space" maxlength="10" class="bg-slate-900 border border-cyan-500/50 rounded-lg px-3 py-1.5 text-yellow-400 text-center w-28 uppercase" />
                 </div>
             </div>
-
             <button type="button" onclick="closeSettingsModal()" class="cyber-button w-full py-3 rounded-xl mt-2">OPSLAAN & SLUITEN</button>
         </div>
     </div>
@@ -252,20 +177,13 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        let selectedGameMode = 'ffa'; // 'ffa' or 'raid'
-        let serverMode = 'ffa'; // Defined to fix ReferenceError
-        let currentLobbyCode = 'BLITZ-' + Math.floor(Math.random() * 8999 + 1000);
-        let friendsList = [
-            { name: 'CyberHero99', online: true, inLobby: false },
-            { name: 'NinjaGamer', online: true, inLobby: true },
-            { name: 'ShadowStriker', online: false, inLobby: false }
-        ];
-
+        let selectedGameMode = 'ffa';
+        let serverMode = 'ffa';
         let gameActive = false;
         let pendingUpgradeChoices = false;
 
-        const MAP_WIDTH = 2800;
-        const MAP_HEIGHT = 2800;
+        const MAP_WIDTH = 2600;
+        const MAP_HEIGHT = 2600;
         let cameraX = 0;
         let cameraY = 0;
 
@@ -274,26 +192,28 @@
         let currentPotKills = 0;
         let currentWave = 1;
         let activeSkin = 'default';
+        let shiftLock = true; // Standaard aan zoals gevraagd
+        let slashEffects = [];
+        let floatingTexts = [];
 
         let keys = {};
         let mouseX = window.innerWidth / 2;
         let mouseY = window.innerHeight / 2;
         let mousedown = false;
+        let keybinds = { dash: 'Space' };
 
-        let keybinds = { attack: 'KeyL', dash: 'Space' };
-
-        // 10 Unique Weapons Definition
+        // 10 Weapons met gebalanceerde en betrouwbare damage
         const weaponsList = [
             { id: 'pistol', name: 'Standaard Pistool', price: 0, unlocked: true, type: 'gun', desc: 'Betrouwbaar standaard vuurwapen.' },
-            { id: 'blade', name: 'Cyber Zwaard', price: 0, unlocked: true, type: 'melee', desc: 'Snelle van dichtbij mêlee slash.' },
-            { id: 'shotgun', name: 'Plasma Shotgun', price: 100, unlocked: false, type: 'gun', desc: 'Schiet 3 plasma projectielen tegelijk.' },
-            { id: 'plasma_smg', name: 'Plasma SMG', price: 180, unlocked: false, type: 'gun', desc: 'Hoge vuursnelheid laserstralen.' },
-            { id: 'laser_sniper', name: 'Laser Sniper', price: 280, unlocked: false, type: 'gun', desc: 'Enorme afstand en hoge precisieschade.' },
-            { id: 'blaster', name: 'Energy Orb Blaster', price: 350, unlocked: false, type: 'orb', desc: 'Schiet krachtige blauwe energy orbs.' },
-            { id: 'flame_blaster', name: 'Flame Launcher', price: 450, unlocked: false, type: 'orb', desc: 'Spuugt brandende orb projectielen.' },
+            { id: 'blade', name: 'Cyber Zwaard', price: 0, unlocked: true, type: 'melee', desc: 'Krachtige mêlee slash van dichtbij.' },
+            { id: 'shotgun', name: 'Plasma Shotgun', price: 100, unlocked: false, type: 'gun', desc: 'Schiet meerdere projectielen tegelijk.' },
+            { id: 'plasma_smg', name: 'Plasma SMG', price: 180, unlocked: false, type: 'gun', desc: 'Hoge vuursnelheid.' },
+            { id: 'laser_sniper', name: 'Laser Sniper', price: 280, unlocked: false, type: 'gun', desc: 'Enorme scherpschutterschade.' },
+            { id: 'blaster', name: 'Energy Orb Blaster', price: 350, unlocked: false, type: 'orb', desc: 'Krachtige energy orbs.' },
+            { id: 'flame_blaster', name: 'Flame Launcher', price: 450, unlocked: false, type: 'orb', desc: 'Brandende projectielen.' },
             { id: 'pulse_rifle', name: 'Pulse Rifle', price: 600, unlocked: false, type: 'gun', desc: 'Geavanceerd aanvalsgeweer.' },
-            { id: 'bazooka', name: 'Homing Bazooka', price: 9999, unlocked: false, requirement: '500_kills', type: 'orb', desc: 'Ontgrendel pas bij 500 Totaal Kills!' },
-            { id: 'god_blaster', name: 'Apocalypse God Blaster', price: 99999, unlocked: false, requirement: 'wave_1000', type: 'orb', desc: 'Exclusieve beloning voor Wave 1000 in Boss Raid!' }
+            { id: 'bazooka', name: 'Homing Bazooka', price: 9999, unlocked: false, requirement: '500_kills', type: 'orb', desc: 'Ontgrendel bij 500 Totaal Kills.' },
+            { id: 'god_blaster', name: 'Apocalypse God Blaster', price: 99999, unlocked: false, requirement: 'wave_1000', type: 'orb', desc: 'Exclusieve God Blaster.' }
         ];
 
         const skinsList = [
@@ -310,11 +230,11 @@
 
         class Fighter {
             constructor(isPlayer, color, name, weaponType) {
-                this.x = Math.random() * (MAP_WIDTH - 500) + 250;
-                this.y = Math.random() * (MAP_HEIGHT - 500) + 250;
-                this.radius = 24;
+                this.x = Math.random() * (MAP_WIDTH - 600) + 300;
+                this.y = Math.random() * (MAP_HEIGHT - 600) + 300;
+                this.radius = 26;
                 this.isPlayer = isPlayer;
-                this.color = activeSkin === 'neon_purple' ? '#a855f7' : (activeSkin === 'gold_titan' ? '#eab308' : (activeSkin === 'matrix_green' ? '#22c55e' : color));
+                this.color = color;
                 this.name = name;
                 this.weaponType = weaponType;
                 
@@ -326,25 +246,22 @@
                 this.vx = 0;
                 this.vy = 0;
                 this.dashCooldown = 0;
-                this.attackCooldown = 0; // Strict attack spam prevention cooldown timer
+                this.attackCooldown = 0; // Strenge cooldown tegen spammen!
                 this.facing = 1;
+                this.aimAngle = 0;
                 
                 this.roamTargetX = this.x + (Math.random() - 0.5) * 800;
                 this.roamTargetY = this.y + (Math.random() - 0.5) * 800;
                 this.roamTimer = Math.floor(Math.random() * 180) + 80;
-                this.strafeTimer = Math.floor(Math.random() * 90) + 40;
-                this.strafeDir = Math.random() < 0.5 ? 1 : -1;
             }
 
             getDamageMultiplier() {
-                let m = (1 + (currentWave * 0.05)) * this.damageBonus;
-                if(this.weaponType === 'god_blaster') m *= 4.0;
-                return m;
+                return (1 + (currentWave * 0.05)) * this.damageBonus;
             }
 
             update(targets) {
                 if(this.dashCooldown > 0) this.dashCooldown--;
-                if(this.attackCooldown > 0) this.attackCooldown--; // Decrement spam guard cooldown
+                if(this.attackCooldown > 0) this.attackCooldown--;
 
                 if(this.isPlayer) {
                     let dx = 0, dy = 0;
@@ -357,102 +274,78 @@
                         let len = Math.hypot(dx, dy);
                         this.vx = (dx / len) * this.speed;
                         this.vy = (dy / len) * this.speed;
-                        this.facing = dx !== 0 ? Math.sign(dx) : this.facing;
                     } else {
                         this.vx *= 0.75;
                         this.vy *= 0.75;
                     }
 
+                    // Vaste Shiftlock: speler kijkt altijd direct strak naar de muiscursor
+                    let worldMouseX = mouseX + cameraX;
+                    let worldMouseY = mouseY + cameraY;
+                    this.aimAngle = Math.atan2(worldMouseY - this.y, worldMouseX - this.x);
+                    this.facing = Math.cos(this.aimAngle) >= 0 ? 1 : -1;
+
                     if(keys['Space'] && this.dashCooldown === 0) {
                         this.dashCooldown = 45;
-                        let angle = Math.atan2(dy, dx);
-                        if(isNaN(angle)) angle = this.facing > 0 ? 0 : Math.PI;
-                        this.x += Math.cos(angle) * 160;
-                        this.y += Math.sin(angle) * 160;
+                        this.x += Math.cos(this.aimAngle) * 160;
+                        this.y += Math.sin(this.aimAngle) * 160;
                     }
 
-                    // Vuur wapen direct zodra je klikt of de aanvalstoets indrukt
-                    if((mousedown || keys[keybinds.attack] || keys['KeyL'] || keys['KeyZ']) && this.attackCooldown === 0) {
-                        let worldMouseX = mouseX + cameraX;
-                        let worldMouseY = mouseY + cameraY;
+                    // Klik met cooldown beveiliging tegen spammen
+                    if(mousedown && this.attackCooldown === 0) {
                         this.fireOrAttack({ x: worldMouseX, y: worldMouseY }, targets);
                     }
 
                 } else {
-                    // Bot AI patrouille en gevecht
                     let validTargets = targets.filter(t => t !== this && t.hp > 0);
-                    
-                    if(serverMode === 'ffa' && validTargets.length > 0) {
-                        validTargets.sort((a, b) => Math.hypot(a.x - this.x, a.y - this.y) - Math.hypot(b.x - this.x, b.y - this.y));
-                    }
+                    let target = validTargets.length > 0 ? validTargets[0] : null;
 
-                    let target = validTargets.length > 0 ? validTargets[Math.floor(Math.random() * Math.min(3, validTargets.length))] : null;
-
-                    if(target && Math.hypot(target.x - this.x, target.y - this.y) < 600) {
-                        this.strafeTimer--;
-                        if(this.strafeTimer <= 0) {
-                            this.strafeDir *= -1;
-                            this.strafeTimer = Math.floor(Math.random() * 100) + 50;
-                        }
+                    if(target && Math.hypot(target.x - this.x, target.y - this.y) < 700) {
                         let directAngle = Math.atan2(target.y - this.y, target.x - this.x);
-                        let moveAngle = directAngle + (Math.PI / 2) * this.strafeDir;
-                        
-                        this.vx = Math.cos(moveAngle) * (this.speed * 0.75);
-                        this.vy = Math.sin(moveAngle) * (this.speed * 0.75);
-                        this.facing = target.x >= this.x ? 1 : -1;
+                        this.vx = Math.cos(directAngle) * (this.speed * 0.7);
+                        this.vy = Math.sin(directAngle) * (this.speed * 0.7);
+                        this.aimAngle = directAngle;
 
-                        if(Math.hypot(target.x - this.x, target.y - this.y) < 450 && this.attackCooldown === 0 && Math.random() < 0.08) {
+                        if(Math.hypot(target.x - this.x, target.y - this.y) < 500 && this.attackCooldown === 0 && Math.random() < 0.09) {
                             this.fireOrAttack(target, targets);
                         }
                     } else {
                         this.roamTimer--;
-                        if(this.roamTimer <= 0 || Math.hypot(this.roamTargetX - this.x, this.roamTargetY - this.y) < 60) {
-                            this.roamTargetX = Math.random() * (MAP_WIDTH - 500) + 250;
-                            this.roamTargetY = Math.random() * (MAP_HEIGHT - 500) + 250;
+                        if(this.roamTimer <= 0) {
+                            this.roamTargetX = Math.random() * (MAP_WIDTH - 600) + 300;
+                            this.roamTargetY = Math.random() * (MAP_HEIGHT - 600) + 300;
                             this.roamTimer = Math.floor(Math.random() * 200) + 100;
                         }
                         let roamAngle = Math.atan2(this.roamTargetY - this.y, this.roamTargetX - this.x);
-                        this.vx = Math.cos(roamAngle) * (this.speed * 0.65);
-                        this.vy = Math.sin(roamAngle) * (this.speed * 0.65);
+                        this.vx = Math.cos(roamAngle) * (this.speed * 0.6);
+                        this.vy = Math.sin(roamAngle) * (this.speed * 0.6);
+                        this.aimAngle = roamAngle;
                     }
                 }
 
                 this.x += this.vx;
                 this.y += this.vy;
-
                 this.x = Math.max(100, Math.min(MAP_WIDTH - 100, this.x));
                 this.y = Math.max(100, Math.min(MAP_HEIGHT - 100, this.y));
             }
 
             fireOrAttack(target, targets) {
-                let w = weaponsList.find(item => item.id === (this.isPlayer ? currentWeaponId : 'pistol'));
+                // Instelbare aanval-cooldown om spammen tegen te gaan (28 frames = ~0.45 sec)
+                this.attackCooldown = 28;
+                let attackAngle = this.isPlayer ? this.aimAngle : Math.atan2(target.y - this.y, target.x - this.x);
                 
-                // Als het zwaard of een melee wapen is
-                if(w.type === 'melee' || (this.isPlayer && currentWeaponId === 'blade')) {
-                    this.attackCooldown = 22;
-                    targets.forEach(f => {
-                        if(f !== this && f.hp > 0 && Math.hypot(f.x - this.x, f.y - this.y) < 170) {
-                            let dmg = Math.round(65 * this.getDamageMultiplier());
-                            f.hp -= dmg;
-                        }
-                    });
-                } else {
-                    // Vuurwapen (gun / orb) logica
-                    this.attackCooldown = w.id === 'god_blaster' ? 18 : (w.id === 'bazooka' ? 40 : (w.id === 'laser_sniper' ? 50 : 25));
-                    let angle = Math.atan2(target.y - this.y, target.x - this.x);
-                    let isOrb = w.type === 'orb';
-
-                    bullets.push({
-                        x: this.x, y: this.y,
-                        startX: this.x, startY: this.y,
-                        vx: Math.cos(angle) * (isOrb ? 15 : 22),
-                        vy: Math.sin(angle) * (isOrb ? 15 : 22),
-                        damage: Math.round((w.id === 'god_blaster' ? 180 : (w.id === 'laser_sniper' ? 110 : (w.id === 'bazooka' ? 80 : 35))) * this.getDamageMultiplier()),
-                        isOrb: isOrb,
-                        maxRange: w.id === 'laser_sniper' ? 1200 : (w.id === 'bazooka' ? 900 : 700),
-                        shooter: this
-                    });
-                }
+                let baseDmg = 45;
+                bullets.push({
+                    x: this.x + Math.cos(attackAngle) * 28,
+                    y: this.y + Math.sin(attackAngle) * 28,
+                    startX: this.x,
+                    startY: this.y,
+                    vx: Math.cos(attackAngle) * 20,
+                    vy: Math.sin(attackAngle) * 20,
+                    damage: Math.round(baseDmg * this.getDamageMultiplier()),
+                    maxRange: 1000,
+                    shooter: this
+                });
             }
 
             draw() {
@@ -463,6 +356,25 @@
                 ctx.globalAlpha = 0.25;
                 ctx.fill();
                 ctx.restore();
+
+                // Shiftlock vizier lijn en richtpunt naar muis
+                if(this.isPlayer) {
+                    ctx.save();
+                    let aimX = this.x + Math.cos(this.aimAngle) * 75;
+                    let aimY = this.y + Math.sin(this.aimAngle) * 75;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x + Math.cos(this.aimAngle) * 26, this.y + Math.sin(this.aimAngle) * 26);
+                    ctx.lineTo(aimX, aimY);
+                    ctx.strokeStyle = '#facc15';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.arc(aimX, aimY, 6, 0, Math.PI * 2);
+                    ctx.fillStyle = '#facc15';
+                    ctx.fill();
+                    ctx.restore();
+                }
 
                 ctx.save();
                 ctx.beginPath();
@@ -475,8 +387,12 @@
                 ctx.fill();
                 ctx.stroke();
 
+                // Oog / richtpunt draait mee
+                let eyeDist = 12;
+                let eyeX = this.x + Math.cos(this.aimAngle) * eyeDist;
+                let eyeY = this.y + Math.sin(this.aimAngle) * eyeDist;
                 ctx.beginPath();
-                ctx.arc(this.x + this.facing * 8, this.y - 4, 4.5, 0, Math.PI * 2);
+                ctx.arc(eyeX, eyeY, 5, 0, Math.PI * 2);
                 ctx.fillStyle = '#ffffff';
                 ctx.fill();
                 ctx.restore();
@@ -491,11 +407,45 @@
             }
         }
 
+        window.toggleShiftLock = function() {
+            shiftLock = !shiftLock;
+            const btn = document.getElementById('shiftlock-btn');
+            if(shiftLock) {
+                btn.innerText = '🔓 SHIFTLOCK: ON';
+                btn.className = 'bg-yellow-400 text-slate-950 border border-yellow-300 px-4 py-2.5 rounded-xl text-xs font-orbitron font-black transition shadow-[0_0_15px_rgba(250,204,21,0.6)]';
+            } else {
+                btn.innerText = '🔒 SHIFTLOCK: OFF';
+                btn.className = 'bg-slate-800 hover:bg-slate-700 border border-yellow-500/50 text-yellow-300 px-4 py-2.5 rounded-xl text-xs font-orbitron font-bold transition';
+            }
+        };
+
+        function spawnDamageText(text, x, y, color) {
+            floatingTexts.push({ text, x, y, color, alpha: 1.0, vy: -1.6 });
+        }
+
+        function handleEnemyKilled(enemy) {
+            currentPotKills++;
+            totalKills++;
+            playerCoins += 35;
+
+            if(selectedGameMode === 'raid') {
+                currentWave++;
+                document.getElementById('hud-match-title').innerText = `BOSS RAID (WAVE ${currentWave} / 1000)`;
+            }
+
+            enemy.hp = enemy.maxHp;
+            enemy.x = Math.random() * (MAP_WIDTH - 600) + 300;
+            enemy.y = Math.random() * (MAP_HEIGHT - 600) + 300;
+
+            gameActive = false;
+            pendingUpgradeChoices = true;
+            document.getElementById('per-kill-upgrade-modal').classList.remove('hidden');
+        }
+
         window.addEventListener('keydown', e => {
             keys[e.code] = true;
-            if(e.code === keybinds.dash && player && player.dashCooldown === 0) {
-                player.dashCooldown = 45;
-                player.x += player.facing * 160;
+            if(e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+                toggleShiftLock();
             }
         });
         window.addEventListener('keyup', e => keys[e.code] = false);
@@ -517,51 +467,7 @@
 
         window.joinLobbyByCode = function() {
             let code = document.getElementById('lobby-code-input').value.trim().toUpperCase();
-            if(code) {
-                currentLobbyCode = code;
-                document.getElementById('current-lobby-code').innerText = code;
-                document.getElementById('lobby-status-text').innerText = `Verbonden met Lobby: ${code}`;
-            }
-        };
-
-        window.openFriendsModal = function() {
-            document.getElementById('friends-modal').classList.remove('hidden');
-            renderFriends();
-        };
-        window.closeFriendsModal = function() {
-            document.getElementById('friends-modal').classList.add('hidden');
-        };
-
-        function renderFriends() {
-            let container = document.getElementById('friends-list-container');
-            container.innerHTML = '';
-            friendsList.forEach(f => {
-                let div = document.createElement('div');
-                div.className = 'bg-slate-900 border border-slate-800 p-3 rounded-xl flex justify-between items-center text-xs';
-                div.innerHTML = `
-                    <div>
-                        <div class="font-orbitron font-bold text-cyan-300">${f.name}</div>
-                        <div class="text-[10px] ${f.online ? 'text-emerald-400' : 'text-gray-500'}">${f.online ? 'Online' : 'Offline'}</div>
-                    </div>
-                    <div>
-                        ${f.online ? `<button type="button" onclick="inviteFriend('${f.name}')" class="cyber-button px-3 py-1.5 rounded-lg text-[10px]">INVITE</button>` : `<span class="text-gray-500 text-[10px]">Bezig</span>`}
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        window.addFriend = function() {
-            let nameInput = document.getElementById('friend-name-input');
-            if(nameInput.value.trim()) {
-                friendsList.push({ name: nameInput.value.trim(), online: true, inLobby: false });
-                nameInput.value = '';
-                renderFriends();
-            }
-        };
-
-        window.inviteFriend = function(friendName) {
-            alert(`Uitnodiging verzonden naar ${friendName} voor lobby ${currentLobbyCode}!`);
+            if(code) alert(`Verbonden met Lobby: ${code}`);
         };
 
         window.startGame = function() {
@@ -580,12 +486,8 @@
 
         window.openSettingsModal = function() {
             document.getElementById('settings-modal').classList.remove('hidden');
-            document.getElementById('bind-attack').value = keybinds.attack;
-            document.getElementById('bind-dash').value = keybinds.dash;
         };
         window.closeSettingsModal = function() {
-            keybinds.attack = document.getElementById('bind-attack').value.trim() || 'KeyL';
-            keybinds.dash = document.getElementById('bind-dash').value.trim() || 'Space';
             document.getElementById('settings-modal').classList.add('hidden');
         };
 
@@ -610,7 +512,7 @@
             container.innerHTML = '';
 
             weaponsList.forEach(w => {
-                let isUnlocked = w.unlocked || (serverMode === 'sandbox') || (w.requirement === '500_kills' && totalKills >= 500) || (w.requirement === 'wave_1000' && currentWave >= 1000);
+                let isUnlocked = w.unlocked;
                 let isSelected = currentWeaponId === w.id;
 
                 let div = document.createElement('div');
@@ -626,9 +528,7 @@
                                 ${isSelected ? 'GEACTIVEERD' : 'SELECTEER'}
                             </button>
                         ` : `
-                            <button type="button" onclick="buyWeapon('${w.id}')" class="cyber-button px-4 py-2 rounded-xl text-xs">
-                                ${w.price === 9999 ? '🔒 500 KILLS' : (w.price === 99999 ? '🔒 WAVE 1000' : w.price + ' 🪙')}
-                            </button>
+                            <button type="button" onclick="buyWeapon('${w.id}')" class="cyber-button px-4 py-2 rounded-xl text-xs">${w.price} 🪙</button>
                         `}
                     </div>
                 `;
@@ -646,7 +546,6 @@
 
         window.buyWeapon = function(id) {
             let w = weaponsList.find(i => i.id === id);
-            if(w.requirement === '500_kills' || w.requirement === 'wave_1000') return;
             if(playerCoins >= w.price) {
                 playerCoins -= w.price;
                 w.unlocked = true;
@@ -658,7 +557,6 @@
         function renderSkins() {
             const container = document.getElementById('shop-skins-container');
             container.innerHTML = '';
-
             skinsList.forEach(s => {
                 let isSelected = activeSkin === s.id;
                 let div = document.createElement('div');
@@ -666,19 +564,12 @@
                 div.innerHTML = `
                     <div class="flex items-center gap-3">
                         <div class="w-6 h-6 rounded-full border border-white/20" style="background: ${s.color};"></div>
-                        <div>
-                            <div class="font-orbitron font-bold text-sm text-cyan-300">${s.name}</div>
-                            <div class="text-xs text-gray-400">Skin & Camo</div>
-                        </div>
+                        <div class="font-orbitron font-bold text-sm text-cyan-300">${s.name}</div>
                     </div>
                     <div>
-                        ${s.unlocked ? `
-                            <button type="button" onclick="selectSkin('${s.id}')" class="px-4 py-2 rounded-xl text-xs font-orbitron font-bold ${isSelected ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-cyan-300'}">
-                                ${isSelected ? 'ACTIEF' : 'KIES'}
-                            </button>
-                        ` : `
-                            <button type="button" onclick="buySkin('${s.id}')" class="cyber-button px-4 py-2 rounded-xl text-xs">${s.price} 🪙</button>
-                        `}
+                        <button type="button" onclick="selectSkin('${s.id}')" class="px-4 py-2 rounded-xl text-xs font-orbitron font-bold ${isSelected ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-cyan-300'}">
+                            ${isSelected ? 'ACTIEF' : 'KIES'}
+                        </button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -692,30 +583,14 @@
             renderSkins();
         };
 
-        window.buySkin = function(id) {
-            let s = skinsList.find(i => i.id === id);
-            if(playerCoins >= s.price) {
-                playerCoins -= s.price;
-                s.unlocked = true;
-                selectSkin(id);
-                renderSkins();
-            }
-        };
-
         window.applyKillUpgrade = function(type) {
             if(!player) return;
-            if(type === 'damage') {
-                player.damageBonus += 0.25;
-            } else if(type === 'speed') {
-                player.speed += 1.0;
-            } else if(type === 'heal') {
-                player.baseMaxHp += 30;
+            if(type === 'damage') player.damageBonus += 0.3;
+            if(type === 'heal') {
+                player.baseMaxHp += 40;
                 player.maxHp = player.baseMaxHp;
                 player.hp = player.maxHp;
-            } else if(type === 'coins') {
-                playerCoins += 100;
             }
-
             document.getElementById('per-kill-upgrade-modal').classList.add('hidden');
             pendingUpgradeChoices = false;
             gameActive = true;
@@ -725,8 +600,8 @@
             document.getElementById('game-over-modal').classList.add('hidden');
             if(player) {
                 player.hp = player.maxHp;
-                player.x = Math.random() * (MAP_WIDTH - 500) + 250;
-                player.y = Math.random() * (MAP_HEIGHT - 500) + 250;
+                player.x = MAP_WIDTH / 2;
+                player.y = MAP_HEIGHT / 2;
             }
             currentPotKills = 0;
             gameActive = true;
@@ -747,22 +622,15 @@
             player = new Fighter(true, '#00f0ff', 'Player', weaponsList.find(w => w.id === currentWeaponId).type);
             players.push(player);
 
-            let botCount = (selectedGameMode === 'raid') ? 5 : 6;
+            // Gereduceerd tot slechts 2 bots zodat het overzichtelijk en leuk blijft!
+            let botCount = 2;
             for(let i=0; i<botCount; i++) {
                 players.push(new Fighter(false, '#ef4444', `Bot ${i+1}`, 'gun'));
             }
         }
 
-        function triggerAnnouncement(text) {
-            let el = document.getElementById('announcement');
-            el.innerText = text;
-            el.style.opacity = '1';
-            setTimeout(() => el.style.opacity = '0', 1600);
-        }
-
         function gameLoop() {
             requestAnimationFrame(gameLoop);
-
             if(!gameActive || pendingUpgradeChoices) return;
 
             cameraX += (player.x - canvas.width/2 - cameraX) * 0.1;
@@ -788,12 +656,27 @@
                 ctx.beginPath(); ctx.moveTo(cameraX, y); ctx.lineTo(cameraX + canvas.width, y); ctx.stroke();
             }
 
+            // Slash effects
+            for(let i = slashEffects.length - 1; i >= 0; i--) {
+                let s = slashEffects[i];
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, 140, s.angle - 0.9, s.angle + 0.9);
+                ctx.strokeStyle = s.color;
+                ctx.lineWidth = 14;
+                ctx.globalAlpha = s.life / 12;
+                ctx.stroke();
+                ctx.restore();
+                s.life--;
+                if(s.life <= 0) slashEffects.splice(i, 1);
+            }
+
+            // Bullet updates & Hit detection
             for(let i = bullets.length - 1; i >= 0; i--) {
                 let b = bullets[i];
                 b.x += b.vx;
                 b.y += b.vy;
 
-                // Controleer of de kogel zijn maximale bereik heeft overschreden (geen infinite range)
                 let traveledDist = Math.hypot(b.x - b.startX, b.y - b.startY);
                 if(traveledDist > b.maxRange) {
                     bullets.splice(i, 1);
@@ -802,45 +685,36 @@
 
                 ctx.save();
                 ctx.beginPath();
-                ctx.arc(b.x, b.y, b.isOrb ? 8 : 4.5, 0, Math.PI * 2);
+                ctx.arc(b.x, b.y, b.isOrb ? 9 : 6, 0, Math.PI * 2);
                 ctx.fillStyle = b.isOrb ? '#38bdf8' : '#facc15';
                 ctx.shadowColor = ctx.fillStyle;
                 ctx.shadowBlur = 12;
                 ctx.fill();
                 ctx.restore();
 
-                players.forEach(f => {
+                let bulletHit = false;
+                for(let j = 0; j < players.length; j++) {
+                    let f = players[j];
                     let canHit = (serverMode === 'ffa') ? (f !== b.shooter) : (f !== b.shooter && (f.isPlayer !== b.shooter.isPlayer));
-                    if(canHit && f.hp > 0 && Math.hypot(f.x - b.x, f.y - b.y) < f.radius + 6) {
+                    // Ruime hit radius (f.radius + 18) om zeker te zijn dat elke kogel raak schiet!
+                    if(canHit && f.hp > 0 && Math.hypot(f.x - b.x, f.y - b.y) < f.radius + 18) {
                         f.hp -= b.damage;
-                        bullets.splice(i, 1);
+                        bulletHit = true;
+                        spawnDamageText(`-${b.damage}`, f.x, f.y - 30, b.shooter.isPlayer ? '#facc15' : '#ef4444');
 
                         if(f.hp <= 0 && b.shooter === player) {
-                            currentPotKills++;
-                            totalKills++;
-                            playerCoins += 25;
-
-                            if(selectedGameMode === 'raid') {
-                                currentWave++;
-                                document.getElementById('hud-match-title').innerText = `BOSS RAID (WAVE ${currentWave} / 1000)`;
-                                if(currentWave >= 1000) {
-                                    triggerAnnouncement("🏆 WAVE 1000 BEREIKT! GOD BLASTER UNLOCKED!");
-                                    weaponsList.find(w => w.id === 'god_blaster').unlocked = true;
-                                }
-                            }
-
-                            f.hp = f.maxHp;
-                            f.x = Math.random() * (MAP_WIDTH - 500) + 250;
-                            f.y = Math.random() * (MAP_HEIGHT - 500) + 250;
-
-                            gameActive = false;
-                            pendingUpgradeChoices = true;
-                            document.getElementById('per-kill-upgrade-modal').classList.remove('hidden');
+                            handleEnemyKilled(f);
                         }
+                        break;
                     }
-                });
+                }
 
-                if(b && (b.x < 0 || b.x > MAP_WIDTH || b.y < 0 || b.y > MAP_HEIGHT)) {
+                if(bulletHit) {
+                    bullets.splice(i, 1);
+                    continue;
+                }
+
+                if(b.x < 0 || b.x > MAP_WIDTH || b.y < 0 || b.y > MAP_HEIGHT) {
                     bullets.splice(i, 1);
                 }
             }
@@ -849,6 +723,22 @@
                 f.update(players);
                 f.draw();
             });
+
+            // Floating numbers
+            for(let i = floatingTexts.length - 1; i >= 0; i--) {
+                let ft = floatingTexts[i];
+                ctx.save();
+                ctx.font = '900 18px Orbitron';
+                ctx.fillStyle = ft.color;
+                ctx.globalAlpha = ft.alpha;
+                ctx.shadowColor = '#000000';
+                ctx.shadowBlur = 6;
+                ctx.fillText(ft.text, ft.x - 15, ft.y);
+                ctx.restore();
+                ft.y += ft.vy;
+                ft.alpha -= 0.025;
+                if(ft.alpha <= 0) floatingTexts.splice(i, 1);
+            }
 
             if(player.hp <= 0) {
                 gameActive = false;
