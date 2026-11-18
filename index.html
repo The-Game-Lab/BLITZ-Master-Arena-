@@ -2,14 +2,14 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BLITZ Master Arena</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; overflow: hidden; background: #050811; font-family: 'Rajdhani', sans-serif; user-select: none; }
+        body { margin: 0; overflow: hidden; background: #050811; font-family: 'Rajdhani', sans-serif; user-select: none; -webkit-touch-callout: none; }
         .font-orbitron { font-family: 'Orbitron', sans-serif; }
-        canvas { display: block; width: 100vw; height: 100vh; cursor: crosshair; }
+        canvas { display: block; width: 100vw; height: 100vh; cursor: crosshair; touch-action: none; }
         .cyber-panel { background: rgba(15, 23, 42, 0.94); border: 2px solid rgba(0, 240, 255, 0.4); box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); backdrop-blur: blur(14px); }
         .cyber-button { background: linear-gradient(135deg, #00f0ff 0%, #3b82f6 100%); color: #03050c; font-family: 'Orbitron', sans-serif; font-weight: 900; transition: all 0.2s; box-shadow: 0 0 20px rgba(0, 240, 255, 0.5); cursor: pointer; }
         .cyber-button:hover { transform: scale(1.04); box-shadow: 0 0 30px rgba(0, 240, 255, 0.85); }
@@ -21,47 +21,67 @@
     <canvas id="gameCanvas"></canvas>
 
     <!-- UI OVERLAY -->
-    <div id="ui-overlay" class="absolute inset-0 pointer-events-none flex flex-col justify-between p-6 z-20">
+    <div id="ui-overlay" class="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 sm:p-6 z-20">
         
-        <!-- Top HUD -->
+        <!-- Top HUD (Shop & Sandbox volledig weg tijdens gameplay zoals gevraagd) -->
         <div class="flex justify-between items-center w-full max-w-7xl mx-auto">
             
             <!-- Player Status -->
-            <div class="cyber-panel rounded-2xl p-4 w-80 pointer-events-auto">
+            <div class="cyber-panel rounded-2xl p-3 sm:p-4 w-64 sm:w-80 pointer-events-auto">
                 <div class="flex justify-between items-center mb-1">
-                    <span id="hud-player-name" class="font-orbitron font-black text-sm text-cyan-400">PLAYER (PISTOOL)</span>
-                    <span id="hud-hp-text" class="text-xs font-bold text-white">100 / 100</span>
+                    <span id="hud-player-name" class="font-orbitron font-black text-xs sm:text-sm text-cyan-400">PLAYER (PISTOOL)</span>
+                    <span id="hud-hp-text" class="text-[11px] sm:text-xs font-bold text-white">100 / 100</span>
                 </div>
-                <div class="w-full bg-slate-900 h-3 rounded-full overflow-hidden border border-cyan-500/40 mb-2">
+                <div class="w-full bg-slate-900 h-2.5 sm:h-3 rounded-full overflow-hidden border border-cyan-500/40 mb-2">
                     <div id="hud-hp-fill" class="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full w-full transition-all duration-100"></div>
                 </div>
-                <div class="flex justify-between items-center text-[11px] text-gray-300">
+                <div class="flex justify-between items-center text-[10px] sm:text-[11px] text-gray-300">
                     <span>COINS: <span id="hud-coins" class="text-yellow-400 font-bold">150 🪙</span></span>
                     <span>TOTAAL KILLS: <span id="hud-total-kills" class="text-cyan-400 font-bold">0</span></span>
                 </div>
             </div>
 
             <!-- Central Game Mode / Wave Title -->
-        <div class="cyber-panel rounded-2xl px-8 py-3 flex flex-col items-center border-yellow-500/60 shadow-[0_0_30px_rgba(234,179,8,0.25)]">
-            <span id="hud-match-title" class="font-orbitron font-black text-xl text-yellow-400 tracking-wider">ARENA BATTLE</span>
-            <span id="hud-quest-tracker" class="text-xs font-bold text-cyan-300 mt-0.5">Versla de vijanden!</span>
+            <div class="cyber-panel rounded-2xl px-4 sm:px-8 py-2 sm:py-3 flex flex-col items-center border-yellow-500/60 shadow-[0_0_30px_rgba(234,179,8,0.25)]">
+                <span id="hud-match-title" class="font-orbitron font-black text-sm sm:text-xl text-yellow-400 tracking-wider">ARENA BATTLE</span>
+                <span id="hud-quest-tracker" class="text-[10px] sm:text-xs font-bold text-cyan-300 mt-0.5">Versla de bots!</span>
+            </div>
+
+            <!-- Settings / Exit button -->
+            <div class="flex gap-2 pointer-events-auto">
+                <button type="button" onclick="openSettingsModal()" class="bg-slate-800 hover:bg-slate-700 border border-cyan-500/50 text-cyan-300 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-orbitron font-bold transition">
+                    ⚙️
+                </button>
+            </div>
+
         </div>
 
-        <!-- Clean Menu (Shop & Sandbox knoppen weg tijdens gameplay) -->
-        <div class="flex gap-3 pointer-events-auto">
-            <button type="button" onclick="openSettingsModal()" class="bg-slate-800 hover:bg-slate-700 border border-cyan-500/50 text-cyan-300 px-4 py-2.5 rounded-xl text-xs font-orbitron font-bold transition">
-                ⚙️ SETTINGS
-            </button>
+        <!-- Mobile Virtual Controls (Alleen zichtbaar / actief op touch-schermen of voor mobiel comfort) -->
+        <div id="mobile-controls" class="absolute inset-0 pointer-events-none flex justify-between items-end p-6 z-30">
+            <!-- Virtuele Bewegingsjoystick (Links) -->
+            <div id="joystick-base" class="relative w-32 h-32 rounded-full border-2 border-cyan-500/40 bg-slate-950/40 backdrop-blur-sm pointer-events-auto flex items-center justify-center">
+                <div id="joystick-stick" class="absolute w-14 h-14 rounded-full bg-cyan-500/70 border border-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.7)] transition-all duration-75"></div>
+            </div>
+
+            <!-- Actie / Aanval knop (Rechts) -->
+            <div class="flex flex-col gap-3 pointer-events-auto">
+                <button type="button" id="mobile-dash-btn" class="w-16 h-16 rounded-full bg-slate-900/80 border-2 border-yellow-400/80 text-yellow-300 font-orbitron font-bold text-xs flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.4)] active:scale-95 transition">
+                    DASH
+                </button>
+                <button type="button" id="mobile-attack-btn" class="w-20 h-20 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 border-2 border-cyan-300 text-slate-950 font-orbitron font-black text-sm flex items-center justify-center shadow-[0_0_25px_rgba(0,240,255,0.7)] active:scale-95 transition">
+                    VUUR
+                </button>
+            </div>
         </div>
 
     </div>
 
     <!-- MAIN MENU MODAL -->
     <div id="main-menu-modal" class="absolute inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-xl p-6 pointer-events-auto">
-        <div class="cyber-panel p-10 rounded-3xl w-full max-w-lg flex flex-col gap-5 text-center shadow-[0_0_80px_rgba(0,240,255,0.4)] border-2 border-cyan-400">
+        <div class="cyber-panel p-8 sm:p-10 rounded-3xl w-full max-w-lg flex flex-col gap-5 text-center shadow-[0_0_80px_rgba(0,240,255,0.4)] border-2 border-cyan-400">
             <div>
                 <div class="inline-block bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 px-3 py-1 rounded-full text-[10px] font-orbitron tracking-widest mb-2">ULTIMATE BATTLEGROUNDS</div>
-                <h1 class="font-orbitron font-black text-4xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-yellow-300 to-blue-500 tracking-wider">BLITZ MASTER</h1>
+                <h1 class="font-orbitron font-black text-3xl sm:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-yellow-300 to-blue-500 tracking-wider">BLITZ MASTER</h1>
             </div>
 
             <div class="flex flex-col gap-3 text-left">
@@ -96,11 +116,11 @@
 
     <!-- ARSENAL & SHOP MODAL -->
     <div id="weapons-modal" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-6 pointer-events-auto">
-        <div class="cyber-panel p-8 rounded-3xl w-full max-w-3xl flex flex-col gap-5 relative pointer-events-auto">
+        <div class="cyber-panel p-6 sm:p-8 rounded-3xl w-full max-w-3xl flex flex-col gap-5 relative pointer-events-auto">
             <div class="flex justify-between items-center">
                 <div class="flex gap-4">
-                    <button type="button" onclick="switchShopTab('weapons')" id="tab-weapons-btn" class="font-orbitron font-bold text-lg text-cyan-400 border-b-2 border-cyan-400 pb-1 cursor-pointer">WAPENS (10)</button>
-                    <button type="button" onclick="switchShopTab('skins')" id="tab-skins-btn" class="font-orbitron font-bold text-lg text-gray-400 pb-1 cursor-pointer hover:text-cyan-300">SKINS & CAMOS</button>
+                    <button type="button" onclick="switchShopTab('weapons')" id="tab-weapons-btn" class="font-orbitron font-bold text-base sm:text-lg text-cyan-400 border-b-2 border-cyan-400 pb-1 cursor-pointer">WAPENS (10)</button>
+                    <button type="button" onclick="switchShopTab('skins')" id="tab-skins-btn" class="font-orbitron font-bold text-base sm:text-lg text-gray-400 pb-1 cursor-pointer hover:text-cyan-300">SKINS & CAMOS</button>
                 </div>
                 <div class="text-xs text-yellow-400 font-orbitron font-bold">SALDO: <span id="shop-coins-display">150 🪙</span></div>
             </div>
@@ -115,13 +135,13 @@
     <!-- PER-KILL UPGRADE MODAL -->
     <div id="per-kill-upgrade-modal" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-slate-950/90 backdrop-blur-lg p-6 pointer-events-auto">
         <div class="cyber-panel p-8 rounded-3xl w-full max-w-lg flex flex-col gap-5 text-center border-2 border-yellow-400 shadow-[0_0_50px_rgba(234,179,8,0.4)] pointer-events-auto">
-            <h2 class="font-orbitron font-black text-3xl text-yellow-400 tracking-wider">VIJAND VERSLAGEN!</h2>
+            <h2 class="font-orbitron font-black text-2xl sm:text-3xl text-yellow-400 tracking-wider">VIJAND VERSLAGEN!</h2>
             <p class="text-xs text-cyan-300 font-orbitron">Kies een sterke upgrade voor je volgende gevecht:</p>
             
             <div class="grid grid-cols-1 gap-3 text-left">
                 <button type="button" onclick="applyKillUpgrade('damage')" class="bg-slate-900 border border-cyan-500/60 hover:border-yellow-400 p-4 rounded-2xl transition cursor-pointer flex justify-between items-center">
                     <div>
-                        <div class="font-orbitron font-bold text-sm text-cyan-300">⚡ DAMAGE BOOST (+25%)</div>
+                        <div class="font-orbitron font-bold text-sm text-cyan-300">⚡ DAMAGE BOOST (+30%)</div>
                         <div class="text-xs text-gray-400 mt-0.5">Vergroot je aanvalsschade permanent voor dit potje.</div>
                     </div>
                     <span class="text-yellow-400 font-bold text-lg">⚔️</span>
@@ -140,7 +160,7 @@
     <!-- GAME OVER MODAL -->
     <div id="game-over-modal" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-slate-950/90 backdrop-blur-lg p-6 pointer-events-auto">
         <div class="cyber-panel p-8 rounded-3xl w-full max-w-md flex flex-col gap-5 text-center border-2 border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.4)]">
-            <h2 class="font-orbitron font-black text-4xl text-red-500 tracking-wider">GAME OVER</h2>
+            <h2 class="font-orbitron font-black text-3xl sm:text-4xl text-red-500 tracking-wider">GAME OVER</h2>
             <div class="text-sm text-gray-300 space-y-1">
                 <div>Kills dit potje: <span id="game-over-pot-kills" class="font-bold text-yellow-400">0</span></div>
                 <div>Totale Kills: <span id="game-over-total-kills" class="font-bold text-cyan-400">0</span></div>
@@ -155,14 +175,12 @@
     <!-- SETTINGS MODAL -->
     <div id="settings-modal" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-6 pointer-events-auto">
         <div class="cyber-panel p-8 rounded-3xl w-full max-w-md flex flex-col gap-5 relative">
-            <h2 class="font-orbitron font-bold text-xl text-cyan-400 text-center">SETTINGS & KEYBINDS</h2>
-            <div class="space-y-4 text-xs font-orbitron">
-                <div class="flex justify-between items-center">
-                    <span>Dash Key:</span>
-                    <input type="text" id="bind-dash" value="Space" maxlength="10" class="bg-slate-900 border border-cyan-500/50 rounded-lg px-3 py-1.5 text-yellow-400 text-center w-28 uppercase" />
-                </div>
+            <h2 class="font-orbitron font-bold text-xl text-cyan-400 text-center">SETTINGS & CONTROLS</h2>
+            <div class="space-y-4 text-xs font-orbitron text-gray-300">
+                <p>PC: WASD om te bewegen, Muis om te richten, Linksklik om te vuren, Spatie voor Dash.</p>
+                <p>Mobiel: Gebruik de virtuele joystick links om te lopen, en de knoppen rechts om te vuren en te dashen!</p>
             </div>
-            <button type="button" onclick="closeSettingsModal()" class="cyber-button w-full py-3 rounded-xl mt-2">OPSLAAN & SLUITEN</button>
+            <button type="button" onclick="closeSettingsModal()" class="cyber-button w-full py-3 rounded-xl mt-2">SLUITEN</button>
         </div>
     </div>
 
@@ -192,7 +210,7 @@
         let currentPotKills = 0;
         let currentWave = 1;
         let activeSkin = 'default';
-        let shiftLock = true; // Standaard aan zoals gevraagd
+        let shiftLock = true;
         let slashEffects = [];
         let floatingTexts = [];
 
@@ -200,9 +218,15 @@
         let mouseX = window.innerWidth / 2;
         let mouseY = window.innerHeight / 2;
         let mousedown = false;
-        let keybinds = { dash: 'Space' };
 
-        // 10 Weapons met gebalanceerde en betrouwbare damage
+        // Mobiele joystick variabelen
+        let isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        let joystickActive = false;
+        let joystickCenter = { x: 0, y: 0 };
+        let joystickMove = { x: 0, y: 0 };
+        let mobileAttackPressed = false;
+
+        // 10 Weapons
         const weaponsList = [
             { id: 'pistol', name: 'Standaard Pistool', price: 0, unlocked: true, type: 'gun', desc: 'Betrouwbaar standaard vuurwapen.' },
             { id: 'blade', name: 'Cyber Zwaard', price: 0, unlocked: true, type: 'melee', desc: 'Krachtige mêlee slash van dichtbij.' },
@@ -246,9 +270,10 @@
                 this.vx = 0;
                 this.vy = 0;
                 this.dashCooldown = 0;
-                this.attackCooldown = 0; // Strenge cooldown tegen spammen!
+                this.attackCooldown = 0;
                 this.facing = 1;
                 this.aimAngle = 0;
+                this.lastMoveAngle = 0; // Bewaar laatste looprichting voor touch shiftlock
                 
                 this.roamTargetX = this.x + (Math.random() - 0.5) * 800;
                 this.roamTargetY = this.y + (Math.random() - 0.5) * 800;
@@ -265,34 +290,60 @@
 
                 if(this.isPlayer) {
                     let dx = 0, dy = 0;
+                    
                     if(keys['KeyW'] || keys['ArrowUp']) dy -= 1;
                     if(keys['KeyS'] || keys['ArrowDown']) dy += 1;
                     if(keys['KeyA'] || keys['ArrowLeft']) dx -= 1;
                     if(keys['KeyD'] || keys['ArrowRight']) dx += 1;
 
+                    if(joystickMove.x !== 0 || joystickMove.y !== 0) {
+                        dx += joystickMove.x;
+                        dy += joystickMove.y;
+                    }
+
                     if(dx !== 0 || dy !== 0) {
                         let len = Math.hypot(dx, dy);
                         this.vx = (dx / len) * this.speed;
                         this.vy = (dy / len) * this.speed;
+                        // Sla direct de beweegrichting op zodat touch shiftlock feilloos werkt op het rondje
+                        this.lastMoveAngle = Math.atan2(dy, dx);
                     } else {
                         this.vx *= 0.75;
                         this.vy *= 0.75;
                     }
 
-                    // Vaste Shiftlock: speler kijkt altijd direct strak naar de muiscursor
+                    // Vaste Shiftlock & Touch Richten
                     let worldMouseX = mouseX + cameraX;
                     let worldMouseY = mouseY + cameraY;
+
+                    // Als we op mobiel spelen en de joystick gebruiken, richt Shiftlock direct strak op de beweegrichting van het rondje of dichtstbijzijnde vijand
+                    let nearest = targets.filter(t => t !== this && t.hp > 0).sort((a, b) => Math.hypot(a.x - this.x, a.y - this.y) - Math.hypot(b.x - this.x, b.y - this.y))[0];
+                    
+                    if(isTouchDevice && (joystickMove.x !== 0 || joystickMove.y !== 0)) {
+                        // Richt op de richting van het touch-rondje of vijand
+                        if(nearest && Math.hypot(nearest.x - this.x, nearest.y - this.y) < 600) {
+                            worldMouseX = nearest.x;
+                            worldMouseY = nearest.y;
+                        } else {
+                            worldMouseX = this.x + Math.cos(this.lastMoveAngle) * 200;
+                            worldMouseY = this.y + Math.sin(this.lastMoveAngle) * 200;
+                        }
+                    } else if(isTouchDevice && nearest) {
+                        // Als je stilstaat op mobiel, richt automatisch op dichtstbijzijnde vijand
+                        worldMouseX = nearest.x;
+                        worldMouseY = nearest.y;
+                    }
+
                     this.aimAngle = Math.atan2(worldMouseY - this.y, worldMouseX - this.x);
                     this.facing = Math.cos(this.aimAngle) >= 0 ? 1 : -1;
 
-                    if(keys['Space'] && this.dashCooldown === 0) {
+                    if((keys['Space'] || keys['KeyQ']) && this.dashCooldown === 0) {
                         this.dashCooldown = 45;
                         this.x += Math.cos(this.aimAngle) * 160;
                         this.y += Math.sin(this.aimAngle) * 160;
                     }
 
-                    // Klik met cooldown beveiliging tegen spammen
-                    if(mousedown && this.attackCooldown === 0) {
+                    if((mousedown || mobileAttackPressed) && this.attackCooldown === 0) {
                         this.fireOrAttack({ x: worldMouseX, y: worldMouseY }, targets);
                     }
 
@@ -330,7 +381,6 @@
             }
 
             fireOrAttack(target, targets) {
-                // Instelbare aanval-cooldown om spammen tegen te gaan (28 frames = ~0.45 sec)
                 this.attackCooldown = 28;
                 let attackAngle = this.isPlayer ? this.aimAngle : Math.atan2(target.y - this.y, target.x - this.x);
                 
@@ -357,7 +407,6 @@
                 ctx.fill();
                 ctx.restore();
 
-                // Shiftlock vizier lijn en richtpunt naar muis
                 if(this.isPlayer) {
                     ctx.save();
                     let aimX = this.x + Math.cos(this.aimAngle) * 75;
@@ -387,7 +436,6 @@
                 ctx.fill();
                 ctx.stroke();
 
-                // Oog / richtpunt draait mee
                 let eyeDist = 12;
                 let eyeX = this.x + Math.cos(this.aimAngle) * eyeDist;
                 let eyeY = this.y + Math.sin(this.aimAngle) * eyeDist;
@@ -407,17 +455,67 @@
             }
         }
 
-        window.toggleShiftLock = function() {
-            shiftLock = !shiftLock;
-            const btn = document.getElementById('shiftlock-btn');
-            if(shiftLock) {
-                btn.innerText = '🔓 SHIFTLOCK: ON';
-                btn.className = 'bg-yellow-400 text-slate-950 border border-yellow-300 px-4 py-2.5 rounded-xl text-xs font-orbitron font-black transition shadow-[0_0_15px_rgba(250,204,21,0.6)]';
-            } else {
-                btn.innerText = '🔒 SHIFTLOCK: OFF';
-                btn.className = 'bg-slate-800 hover:bg-slate-700 border border-yellow-500/50 text-yellow-300 px-4 py-2.5 rounded-xl text-xs font-orbitron font-bold transition';
+        // Setup Touch Joystick handlers
+        const joystickBase = document.getElementById('joystick-base');
+        const joystickStick = document.getElementById('joystick-stick');
+        let touchId = null;
+
+        joystickBase.addEventListener('touchstart', e => {
+            e.preventDefault();
+            let t = e.changedTouches[0];
+            touchId = t.identifier;
+            let rect = joystickBase.getBoundingClientRect();
+            joystickCenter = { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
+            updateJoystick(t.clientX, t.clientY);
+        });
+
+        joystickBase.addEventListener('touchmove', e => {
+            e.preventDefault();
+            for(let i=0; i<e.changedTouches.length; i++) {
+                let t = e.changedTouches[i];
+                if(t.identifier === touchId) {
+                    updateJoystick(t.clientX, t.clientY);
+                }
             }
-        };
+        });
+
+        function endTouchJoystick(e) {
+            for(let i=0; i<e.changedTouches.length; i++) {
+                if(e.changedTouches[i].identifier === touchId) {
+                    touchId = null;
+                    joystickMove = { x: 0, y: 0 };
+                    joystickStick.style.transform = `translate(0px, 0px)`;
+                }
+            }
+        }
+        joystickBase.addEventListener('touchend', endTouchJoystick);
+        joystickBase.addEventListener('touchcancel', endTouchJoystick);
+
+        function updateJoystick(clientX, clientY) {
+            let dx = clientX - joystickCenter.x;
+            let dy = clientY - joystickCenter.y;
+            let dist = Math.hypot(dx, dy);
+            let maxDist = 45;
+
+            if(dist > maxDist) {
+                dx = (dx / dist) * maxDist;
+                dy = (dy / dist) * maxDist;
+            }
+
+            joystickStick.style.transform = `translate(${dx}px, ${dy}px)`;
+            joystickMove = { x: dx / maxDist, y: dy / maxDist };
+        }
+
+        document.getElementById('mobile-attack-btn').addEventListener('touchstart', e => { e.preventDefault(); mobileAttackPressed = true; });
+        document.getElementById('mobile-attack-btn').addEventListener('touchend', e => { e.preventDefault(); mobileAttackPressed = false; });
+        document.getElementById('mobile-dash-btn').addEventListener('touchstart', e => { 
+            e.preventDefault(); 
+            if(player && player.dashCooldown === 0) {
+                player.dashCooldown = 45;
+                player.x += Math.cos(player.aimAngle) * 160;
+                player.y += Math.sin(player.aimAngle) * 160;
+            }
+        });
 
         function spawnDamageText(text, x, y, color) {
             floatingTexts.push({ text, x, y, color, alpha: 1.0, vy: -1.6 });
@@ -442,12 +540,7 @@
             document.getElementById('per-kill-upgrade-modal').classList.remove('hidden');
         }
 
-        window.addEventListener('keydown', e => {
-            keys[e.code] = true;
-            if(e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
-                toggleShiftLock();
-            }
-        });
+        window.addEventListener('keydown', e => { keys[e.code] = true; });
         window.addEventListener('keyup', e => keys[e.code] = false);
 
         window.addEventListener('mousemove', e => {
@@ -622,7 +715,6 @@
             player = new Fighter(true, '#00f0ff', 'Player', weaponsList.find(w => w.id === currentWeaponId).type);
             players.push(player);
 
-            // Gereduceerd tot slechts 2 bots zodat het overzichtelijk en leuk blijft!
             let botCount = 2;
             for(let i=0; i<botCount; i++) {
                 players.push(new Fighter(false, '#ef4444', `Bot ${i+1}`, 'gun'));
@@ -656,22 +748,6 @@
                 ctx.beginPath(); ctx.moveTo(cameraX, y); ctx.lineTo(cameraX + canvas.width, y); ctx.stroke();
             }
 
-            // Slash effects
-            for(let i = slashEffects.length - 1; i >= 0; i--) {
-                let s = slashEffects[i];
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, 140, s.angle - 0.9, s.angle + 0.9);
-                ctx.strokeStyle = s.color;
-                ctx.lineWidth = 14;
-                ctx.globalAlpha = s.life / 12;
-                ctx.stroke();
-                ctx.restore();
-                s.life--;
-                if(s.life <= 0) slashEffects.splice(i, 1);
-            }
-
-            // Bullet updates & Hit detection
             for(let i = bullets.length - 1; i >= 0; i--) {
                 let b = bullets[i];
                 b.x += b.vx;
@@ -685,8 +761,8 @@
 
                 ctx.save();
                 ctx.beginPath();
-                ctx.arc(b.x, b.y, b.isOrb ? 9 : 6, 0, Math.PI * 2);
-                ctx.fillStyle = b.isOrb ? '#38bdf8' : '#facc15';
+                ctx.arc(b.x, b.y, 6, 0, Math.PI * 2);
+                ctx.fillStyle = '#facc15';
                 ctx.shadowColor = ctx.fillStyle;
                 ctx.shadowBlur = 12;
                 ctx.fill();
@@ -696,7 +772,6 @@
                 for(let j = 0; j < players.length; j++) {
                     let f = players[j];
                     let canHit = (serverMode === 'ffa') ? (f !== b.shooter) : (f !== b.shooter && (f.isPlayer !== b.shooter.isPlayer));
-                    // Ruime hit radius (f.radius + 18) om zeker te zijn dat elke kogel raak schiet!
                     if(canHit && f.hp > 0 && Math.hypot(f.x - b.x, f.y - b.y) < f.radius + 18) {
                         f.hp -= b.damage;
                         bulletHit = true;
@@ -724,7 +799,6 @@
                 f.draw();
             });
 
-            // Floating numbers
             for(let i = floatingTexts.length - 1; i >= 0; i--) {
                 let ft = floatingTexts[i];
                 ctx.save();
