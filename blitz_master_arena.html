@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLITZ Master Arena</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; overflow: hidden; background: #050811; font-family: 'Rajdhani', sans-serif; user-select: none; }
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+        canvas { display: block; width: 100vw; height: 100vh; }
+        .cyber-panel { background: rgba(15, 23, 42, 0.94); border: 2px solid rgba(0, 240, 255, 0.4); box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); backdrop-blur: blur(14px); }
+        .cyber-button { background: linear-gradient(135deg, #00f0ff 0%, #3b82f6 100%); color: #03050c; font-family: 'Orbitron', sans-serif; font-weight: 900; transition: all 0.2s; box-shadow: 0 0 20px rgba(0, 240, 255, 0.5); cursor: pointer; }
+        .cyber-button:hover { transform: scale(1.04); box-shadow: 0 0 30px rgba(0, 240, 255, 0.85); }
+    </style>
+</head>
+<body class="relative w-screen h-screen overflow-hidden">
+
+    <!-- Canvas Container -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- UI OVERLAY -->
+    <div id="ui-overlay" class="absolute inset-0 pointer-events-none flex flex-col justify-between p-6 z-20">
+        
+        <!-- Top HUD -->
+        <div class="flex justify-between items-center w-full max-w-7xl mx-auto">
+            
+            <!-- Player Status -->
+            <div class="cyber-panel rounded-2xl p-4 w-80 pointer-events-auto">
+                <div class="flex justify-between items-center mb-1">
+                    <span id="hud-player-name" class="font-orbitron font-black text-sm text-cyan-400">PLAYER (PISTOOL)</span>
+                    <span id="hud-hp-text" class="text-xs font-bold text-white">100 / 100</span>
+                </div>
+                <div class="w-full bg-slate-900 h-3 rounded-full overflow-hidden border border-cyan-500/40 mb-2">
+                    <div id="hud-hp-fill" class="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full w-full transition-all duration-100"></div>
+                </div>
+                <div class="flex justify-between items-center text-[11px] text-gray-300">
+                    <span>COINS: <span id="hud-coins" class="text-yellow-400 font-bold">150 🪙</span></span>
+                    <span>TOTAAL KILLS: <span id="hud-total-kills" class="text-cyan-400 font-bold">0</span></span>
+                </div>
+            </div>
+
+            <!-- Central Game Mode / Wave Title -->
+            <div class="cyber-panel rounded-2xl px-8 py-3 flex flex-col items-center border-yellow-500/60 shadow-[0_0_30px_rgba(234,179,8,0.25)]">
+                <span id="hud-match-title" class="font-orbitron font-black text-xl text-yellow-400 tracking-wider">SANDBOX ARENA</span>
+                <span id="hud-quest-tracker" class="text-xs font-bold text-cyan-300 mt-0.5">Versla vijanden en word de sterkste!</span>
+            </div>
+
+            <!-- Menu / Shop Buttons -->
+            <div class="flex gap-3 pointer-events-auto">
+                <button type="button" onclick="openWeaponsModal()" class="cyber-button px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5">
+                    <span>⚔️ ARSENAL & SHOP</span>
+                </button>
+                <button type="button" onclick="openSettingsModal()" class="bg-slate-800 hover:bg-slate-700 border border-cyan-500/50 text-cyan-300 px-4 py-2.5 rounded-xl text-xs font-orbitron font-bold transition">
+                    ⚙️ SETTINGS
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Center Floating Announcements -->
+        <div class="flex flex-col items-center justify-center pointer-events-none">
+            <div id="announcement" class="font-orbitron font-black text-4xl text-yellow-400 drop-shadow-[0_0_20px_rgba(234,179,8,0.9)] opacity-0 transition-opacity duration-150 text-center">
+                WAVE CLEARED!
+            </div>
+        </div>
+
+        <!-- Bottom Controls Info -->
+        <div class="flex justify-between items-end w-full max-w-7xl mx-auto">
+            <div class="cyber-panel rounded-xl p-3 text-xs text-gray-300 pointer-events-auto">
+                <div class="font-bold text-cyan-400 mb-0.5 font-orbitron">BESTURING</div>
+                <div><span class="text-yellow-400 font-bold" id="ctrl-move">WASD / Pijltjes</span>: Vrij Bewegen (Omhoog/Omlaag/Links/Rechts)</div>
+                <div><span class="text-yellow-400 font-bold" id="ctrl-atk">Linksklik / M1 / L</span>: Aanvallen / Zwaard Slash</div>
+            </div>
+            
+            <div class="cyber-panel rounded-xl p-3 text-xs text-gray-300 pointer-events-auto text-right">
+                <div class="font-bold text-yellow-400 mb-0.5 font-orbitron">TIP</div>
+                <div>Versla vijanden om direct krachtige upgrades te kiezen!</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MAIN MENU MODAL (Shop & Arsenal as First Priority Button) -->
+    <div id="main-menu-modal" class="absolute inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-xl p-6 pointer-events-auto">
+        <div class="cyber-panel p-10 rounded-3xl w-full max-w-lg flex flex-col gap-5 text-center shadow-[0_0_80px_rgba(0,240,255,0.4)] border-2 border-cyan-400">
+            <div>
+                <div class="inline-block bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 px-3 py-1 rounded-full text-[10px] font-orbitron tracking-widest mb-2">ULTIMATE BATTLEGROUNDS</div>
+                <h1 class="font-orbitron font-black text-4xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-yellow-300 to-blue-500 tracking-wider">BLITZ MASTER</h1>
+            </div>
+
+            <div class="flex flex-col gap-3 text-left">
+                <!-- Shop & Arsenal Direct Access First -->
+                <button type="button" onclick="openWeaponsModal()" class="cyber-button w-full py-3.5 rounded-2xl text-xs flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(0,240,255,0.5)]">
+                    <span>⚔️ ARSENAL & SHOP (UPGRADES & SKINS)</span>
+                </button>
+
+                <!-- Single Game Mode Selector -->
+                <div>
+                    <label class="text-[11px] font-orbitron text-cyan-400 font-bold mb-1 block">SPELMODUS:</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" onclick="selectGameMode('ffa')" id="btn-mode-ffa" class="py-2.5 rounded-xl font-orbitron font-bold text-xs bg-cyan-500 text-slate-950 transition">FREE FOR ALL (FFA)</button>
+                        <button type="button" onclick="selectGameMode('raid')" id="btn-mode-raid" class="py-2.5 rounded-xl font-orbitron font-bold text-xs bg-slate-900 text-gray-300 hover:bg-slate-800 border border-slate-700 transition">BOSS RAID</button>
+                    </div>
+                </div>
+
+                <!-- Lobby Code & Friends System -->
+                <div class="bg-slate-900/80 p-3 rounded-2xl border border-cyan-500/30 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-orbitron text-cyan-300 font-bold">LOBBY CODE:</span>
+                        <div class="flex gap-2">
+                            <input type="text" id="lobby-code-input" placeholder="BIJV: BLITZ99" class="bg-slate-950 border border-cyan-500/50 rounded-lg px-2 py-1 text-xs text-yellow-400 font-orbitron uppercase w-28 text-center" />
+                            <button type="button" onclick="joinLobbyByCode()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-3 py-1 rounded-lg text-xs font-orbitron font-bold">JOIN</button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center border-t border-slate-800 pt-2">
+                        <span class="text-xs font-orbitron text-gray-300 font-bold">VRIENDEN (ONLINE):</span>
+                        <button type="button" onclick="openFriendsModal()" class="bg-slate-800 hover:bg-slate-700 text-cyan-300 px-3 py-1 rounded-lg text-xs font-orbitron">BEHEER VRIENDEN</button>
+                    </div>
+                    <div id="lobby-status-text" class="text-[11px] text-emerald-400 font-orbitron text-center">Eigen Lobby Actief (Code: <span id="current-lobby-code">BLITZ-1</span>)</div>
+                </div>
+
+                <button type="button" onclick="startGame()" class="cyber-button w-full py-4 rounded-2xl text-base flex items-center justify-center gap-2 mt-1">
+                    <span>🚀 START GAME</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FRIENDS & INVITE MODAL -->
+    <div id="friends-modal" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-6 pointer-events-auto">
+        <div class="cyber-panel p-8 rounded-3xl w-full max-w-md flex flex-col gap-5">
+            <h2 class="font-orbitron font-bold text-lg text-cyan-400 text-center">VRIENDEN & UITNODIGINGEN</h2>
+            <div class="space-y-2">
+                <div class="flex gap-2">
+                    <input type="text" id="friend-name-input" placeholder="Vriend gebruikersnaam..." class="flex-1 bg-slate-900 border border-cyan-500/50 rounded-xl px-3 py-2 text-xs text-white" />
+                    <button type="button" onclick="addFriend()" class="cyber-button px-4 py-2 rounded-xl text-xs">VOEG TOE</button>
+                </div>
+            </div>
+            <div id="friends-list-container" class="space-y-2 max-h-52 overflow-y-auto pr-1">
+                <!-- Dynamic friends list -->
+            </div>
+            <button type="button" onclick="closeFriendsModal()" class="cyber-button w-full py-3 rounded-xl text-xs">SLUITEN</button>
+        </div>
+    </div>
+
+    <!-- ARSENAL & SHOP MODAL (10 Weapons + Skins Tab) -->
+    <div id="weapons-modal" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-6 pointer-events-auto">
+        <div class="cyber-panel p-8 rounded-3xl w-full max-w-3xl flex flex-col gap-5 relative pointer-events-auto">
+            <div class="flex justify-between items-center">
+                <div class="flex gap-4">
+                    <button type="button" onclick="switchShopTab('weapons')" id="tab-weapons-btn" class="font-orbitron font-bold text-lg text-cyan-400 border-b-2 border-cyan-400 pb-1 cursor-pointer">WAPENS (10)</button>
+                    <button type="button" onclick="switchShopTab('skins')" id="tab-skins-btn" class="font-orbitron font-bold text-lg text-gray-400 pb-1 cursor-pointer hover:text-cyan-300">SKINS & CAMOS</button>
+                </div>
+                <div class="text-xs text-yellow-400 font-orbitron font-bold">SALDO: <span id="shop-coins-display">150 🪙</span></div>
+            </div>
+            
+            <div id="shop-weapons-container" class="grid grid-cols-1 gap-3 max-h-80 overflow-y-auto pr-1"></div>
+            <div id="shop-skins-container" class="grid grid-cols-1 gap-3 max-h-80 overflow-y-auto pr-1 hidden"></div>
+
+            <button type="button" onclick="closeWeaponsModal()" class="cyber-button w-full py-3 rounded-xl">SLUITEN</button>
+        </div>
+    </div>
+
+    <!-- PER-KILL UPGRADE MODAL -->
+    <div id="per-kill-upgrade-modal" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-slate-950/90 backdrop-blur-lg p-6 pointer-events-auto">
+        <div class="cyber-panel p-8 rounded-3xl w-full max-w-lg flex flex-col gap-5 text-center border-2 border-yellow-400 shadow-[0_0_50px_rgba(234,179,8,0.4)] pointer-events-auto">
+            <h2 class="font-orbitron font-black text-3xl text-yellow-400 tracking-wider">VIJAND VERSLAGEN!</h2>
+            <p class="text-xs text-cyan-300 font-orbitron">Kies een sterke upgrade voor je volgende gevecht:</p>
+            
+            <div class="grid grid-cols-1 gap-3 text-left">
+                <button type="button" onclick="applyKillUpgrade('damage')" class="bg-slate-900 border border-cyan-500/60 hover:border-yellow-400 p-4 rounded-2xl transition cursor-pointer flex justify-between items-center">
+                    <div>
+                        <div class="font-orbitron font-bold text-sm text-cyan-300">⚡ DAMAGE BOOST (+25%)</div>
+                        <div class="text-xs text-gray-400 mt-0.5">Vergroot je aanvalsschade permanent voor dit potje.</div>
+                    </div>
+                    <span class="text-yellow-400 font-bold text-lg">⚔️</span>
+                </button>
+
+                <button type="button" onclick="applyKillUpgrade('speed')" class="bg-slate-900 border border-cyan-500/60 hover:border-yellow-400 p-4 rounded-2xl transition cursor-pointer flex justify-between items-center">
+                    <div>
+                        <div class="font-orbitron font-bold text-sm text-cyan-300">💨 SPEED & DASH BOOST</div>
+                        <div class="text-xs text-gray-400 mt-0.5">Verhoog je bewegingssnelheid en dash-cooldown.</div>
+                    </div>
+                    <span class="text-cyan-400 font-bold text-lg">🏃</span>
+                </button>
+
+                <button type="button" onclick="applyKillUpgrade('heal')" class="bg-slate-900 border border-cyan-500/60 hover:border-yellow-400 p-4 rounded-2xl transition cursor-pointer flex justify-between items-center">
+                    <div>
+                        <div class="font-orbitron font-bold text-sm text-cyan-300">❤️ VOLLEDIG HERSTEL + MAX HP</div>
+                        <div class="text-xs text-gray-400 mt-0.5">Herstel al je HP en verhoog je maximale HP.</div>
+                    </div>
+                    <span class="text-emerald-400 font-bold text-lg">🛡️</span>
+                </button>
+
+                <button type="button" onclick="applyKillUpgrade('coins')" class="bg-slate-900 border border-cyan-500/60 hover:border-yellow-400 p-4 rounded-2xl transition cursor-pointer flex justify-between items-center">
+                    <div>
+                        <div class="font-orbitron font-bold text-sm text-cyan-300">🪙 BONUS COINS (+100)</div>
+                        <div class="text-xs text-gray-400 mt-0.5">Ontvang direct 100 extra coins voor de shop.</div>
+                    </div>
+                    <span class="text-yellow-400 font-bold text-lg">💰</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME OVER / RESPAWN MODAL -->
+    <div id="game-over-modal" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-slate-950/90 backdrop-blur-lg p-6 pointer-events-auto">
+        <div class="cyber-panel p-8 rounded-3xl w-full max-w-md flex flex-col gap-5 text-center border-2 border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.4)]">
+            <h2 class="font-orbitron font-black text-4xl text-red-500 tracking-wider">GAME OVER</h2>
+            <div class="text-sm text-gray-300 space-y-1">
+                <div>Kills dit potje: <span id="game-over-pot-kills" class="font-bold text-yellow-400">0</span></div>
+                <div>Totale Kills: <span id="game-over-total-kills" class="font-bold text-cyan-400">0</span></div>
+            </div>
+
+            <div class="flex flex-col gap-3 mt-2">
+                <button type="button" onclick="respawnPlayer()" class="cyber-button w-full py-4 rounded-2xl text-base">RESPAWN</button>
+                <button type="button" onclick="returnToMainMenu()" class="bg-slate-800 hover:bg-slate-700 text-gray-300 font-orbitron font-bold py-3 rounded-xl transition">HOOFDMENU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-6 pointer-events-auto">
+        <div class="cyber-panel p-8 rounded-3xl w-full max-w-md flex flex-col gap-5 relative">
+            <h2 class="font-orbitron font-bold text-xl text-cyan-400 text-center">SETTINGS & KEYBINDS</h2>
+            
+            <div class="space-y-4 text-xs font-orbitron">
+                <div class="flex justify-between items-center">
+                    <span>Aanval / Vuur (M1 Key):</span>
+                    <input type="text" id="bind-attack" value="KeyL" maxlength="5" class="bg-slate-900 border border-cyan-500/50 rounded-lg px-3 py-1.5 text-yellow-400 text-center w-28 uppercase" />
+                </div>
+                <div class="flex justify-between items-center">
+                    <span>Dash Key:</span>
+                    <input type="text" id="bind-dash" value="Space" maxlength="10" class="bg-slate-900 border border-cyan-500/50 rounded-lg px-3 py-1.5 text-yellow-400 text-center w-28 uppercase" />
+                </div>
+            </div>
+
+            <button type="button" onclick="closeSettingsModal()" class="cyber-button w-full py-3 rounded-xl mt-2">OPSLAAN & SLUITEN</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let selectedGameMode = 'ffa'; // 'ffa' or 'raid'
+        let serverMode = 'ffa'; // Defined to fix ReferenceError
+        let currentLobbyCode = 'BLITZ-' + Math.floor(Math.random() * 8999 + 1000);
+        let friendsList = [
+            { name: 'CyberHero99', online: true, inLobby: false },
+            { name: 'NinjaGamer', online: true, inLobby: true },
+            { name: 'ShadowStriker', online: false, inLobby: false }
+        ];
+
+        let gameActive = false;
+        let pendingUpgradeChoices = false;
+
+        const MAP_WIDTH = 2800;
+        const MAP_HEIGHT = 2800;
+        let cameraX = 0;
+        let cameraY = 0;
+
+        let playerCoins = 150;
+        let totalKills = 0;
+        let currentPotKills = 0;
+        let currentWave = 1;
+        let activeSkin = 'default';
+
+        let keys = {};
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let mousedown = false;
+
+        let keybinds = { attack: 'KeyL', dash: 'Space' };
+
+        // 10 Unique Weapons Definition
+        const weaponsList = [
+            { id: 'pistol', name: 'Standaard Pistool', price: 0, unlocked: true, type: 'gun', desc: 'Betrouwbaar standaard vuurwapen.' },
+            { id: 'blade', name: 'Cyber Zwaard', price: 0, unlocked: true, type: 'melee', desc: 'Snelle van dichtbij mêlee slash.' },
+            { id: 'shotgun', name: 'Plasma Shotgun', price: 100, unlocked: false, type: 'gun', desc: 'Schiet 3 plasma projectielen tegelijk.' },
+            { id: 'plasma_smg', name: 'Plasma SMG', price: 180, unlocked: false, type: 'gun', desc: 'Hoge vuursnelheid laserstralen.' },
+            { id: 'laser_sniper', name: 'Laser Sniper', price: 280, unlocked: false, type: 'gun', desc: 'Enorme afstand en hoge precisieschade.' },
+            { id: 'blaster', name: 'Energy Orb Blaster', price: 350, unlocked: false, type: 'orb', desc: 'Schiet krachtige blauwe energy orbs.' },
+            { id: 'flame_blaster', name: 'Flame Launcher', price: 450, unlocked: false, type: 'orb', desc: 'Spuugt brandende orb projectielen.' },
+            { id: 'pulse_rifle', name: 'Pulse Rifle', price: 600, unlocked: false, type: 'gun', desc: 'Geavanceerd aanvalsgeweer.' },
+            { id: 'bazooka', name: 'Homing Bazooka', price: 9999, unlocked: false, requirement: '500_kills', type: 'orb', desc: 'Ontgrendel pas bij 500 Totaal Kills!' },
+            { id: 'god_blaster', name: 'Apocalypse God Blaster', price: 99999, unlocked: false, requirement: 'wave_1000', type: 'orb', desc: 'Exclusieve beloning voor Wave 1000 in Boss Raid!' }
+        ];
+
+        const skinsList = [
+            { id: 'default', name: 'Standard Cyber Suit', price: 0, unlocked: true, color: '#00f0ff' },
+            { id: 'neon_purple', name: 'Neon Purple Rogue', price: 120, unlocked: false, color: '#a855f7' },
+            { id: 'gold_titan', name: 'Gold Titan Armor', price: 300, unlocked: false, color: '#eab308' },
+            { id: 'matrix_green', name: 'Matrix Hacker', price: 250, unlocked: false, color: '#22c55e' }
+        ];
+
+        let currentWeaponId = 'pistol';
+        let players = [];
+        let bullets = [];
+        let player = null;
+
+        class Fighter {
+            constructor(isPlayer, color, name, weaponType) {
+                this.x = Math.random() * (MAP_WIDTH - 500) + 250;
+                this.y = Math.random() * (MAP_HEIGHT - 500) + 250;
+                this.radius = 24;
+                this.isPlayer = isPlayer;
+                this.color = activeSkin === 'neon_purple' ? '#a855f7' : (activeSkin === 'gold_titan' ? '#eab308' : (activeSkin === 'matrix_green' ? '#22c55e' : color));
+                this.name = name;
+                this.weaponType = weaponType;
+                
+                this.baseMaxHp = 100;
+                this.maxHp = this.baseMaxHp;
+                this.hp = this.maxHp;
+                this.speed = 5.2;
+                this.damageBonus = 1.0;
+                this.vx = 0;
+                this.vy = 0;
+                this.dashCooldown = 0;
+                this.attackCooldown = 0; // Strict attack spam prevention cooldown timer
+                this.facing = 1;
+                
+                this.roamTargetX = this.x + (Math.random() - 0.5) * 800;
+                this.roamTargetY = this.y + (Math.random() - 0.5) * 800;
+                this.roamTimer = Math.floor(Math.random() * 180) + 80;
+                this.strafeTimer = Math.floor(Math.random() * 90) + 40;
+                this.strafeDir = Math.random() < 0.5 ? 1 : -1;
+            }
+
+            getDamageMultiplier() {
+                let m = (1 + (currentWave * 0.05)) * this.damageBonus;
+                if(this.weaponType === 'god_blaster') m *= 4.0;
+                return m;
+            }
+
+            update(targets) {
+                if(this.dashCooldown > 0) this.dashCooldown--;
+                if(this.attackCooldown > 0) this.attackCooldown--; // Decrement spam guard cooldown
+
+                if(this.isPlayer) {
+                    let dx = 0, dy = 0;
+                    if(keys['KeyW'] || keys['ArrowUp']) dy -= 1;
+                    if(keys['KeyS'] || keys['ArrowDown']) dy += 1;
+                    if(keys['KeyA'] || keys['ArrowLeft']) dx -= 1;
+                    if(keys['KeyD'] || keys['ArrowRight']) dx += 1;
+
+                    if(dx !== 0 || dy !== 0) {
+                        let len = Math.hypot(dx, dy);
+                        this.vx = (dx / len) * this.speed;
+                        this.vy = (dy / len) * this.speed;
+                        this.facing = dx !== 0 ? Math.sign(dx) : this.facing;
+                    } else {
+                        this.vx *= 0.75;
+                        this.vy *= 0.75;
+                    }
+
+                    if(keys['Space'] && this.dashCooldown === 0) {
+                        this.dashCooldown = 45;
+                        let angle = Math.atan2(dy, dx);
+                        if(isNaN(angle)) angle = this.facing > 0 ? 0 : Math.PI;
+                        this.x += Math.cos(angle) * 160;
+                        this.y += Math.sin(angle) * 160;
+                    }
+
+                    // Vuur wapen direct zodra je klikt of de aanvalstoets indrukt
+                    if((mousedown || keys[keybinds.attack] || keys['KeyL'] || keys['KeyZ']) && this.attackCooldown === 0) {
+                        let worldMouseX = mouseX + cameraX;
+                        let worldMouseY = mouseY + cameraY;
+                        this.fireOrAttack({ x: worldMouseX, y: worldMouseY }, targets);
+                    }
+
+                } else {
+                    // Bot AI patrouille en gevecht
+                    let validTargets = targets.filter(t => t !== this && t.hp > 0);
+                    
+                    if(serverMode === 'ffa' && validTargets.length > 0) {
+                        validTargets.sort((a, b) => Math.hypot(a.x - this.x, a.y - this.y) - Math.hypot(b.x - this.x, b.y - this.y));
+                    }
+
+                    let target = validTargets.length > 0 ? validTargets[Math.floor(Math.random() * Math.min(3, validTargets.length))] : null;
+
+                    if(target && Math.hypot(target.x - this.x, target.y - this.y) < 600) {
+                        this.strafeTimer--;
+                        if(this.strafeTimer <= 0) {
+                            this.strafeDir *= -1;
+                            this.strafeTimer = Math.floor(Math.random() * 100) + 50;
+                        }
+                        let directAngle = Math.atan2(target.y - this.y, target.x - this.x);
+                        let moveAngle = directAngle + (Math.PI / 2) * this.strafeDir;
+                        
+                        this.vx = Math.cos(moveAngle) * (this.speed * 0.75);
+                        this.vy = Math.sin(moveAngle) * (this.speed * 0.75);
+                        this.facing = target.x >= this.x ? 1 : -1;
+
+                        if(Math.hypot(target.x - this.x, target.y - this.y) < 450 && this.attackCooldown === 0 && Math.random() < 0.08) {
+                            this.fireOrAttack(target, targets);
+                        }
+                    } else {
+                        this.roamTimer--;
+                        if(this.roamTimer <= 0 || Math.hypot(this.roamTargetX - this.x, this.roamTargetY - this.y) < 60) {
+                            this.roamTargetX = Math.random() * (MAP_WIDTH - 500) + 250;
+                            this.roamTargetY = Math.random() * (MAP_HEIGHT - 500) + 250;
+                            this.roamTimer = Math.floor(Math.random() * 200) + 100;
+                        }
+                        let roamAngle = Math.atan2(this.roamTargetY - this.y, this.roamTargetX - this.x);
+                        this.vx = Math.cos(roamAngle) * (this.speed * 0.65);
+                        this.vy = Math.sin(roamAngle) * (this.speed * 0.65);
+                    }
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                this.x = Math.max(100, Math.min(MAP_WIDTH - 100, this.x));
+                this.y = Math.max(100, Math.min(MAP_HEIGHT - 100, this.y));
+            }
+
+            fireOrAttack(target, targets) {
+                let w = weaponsList.find(item => item.id === (this.isPlayer ? currentWeaponId : 'pistol'));
+                
+                // Als het zwaard of een melee wapen is
+                if(w.type === 'melee' || (this.isPlayer && currentWeaponId === 'blade')) {
+                    this.attackCooldown = 22;
+                    targets.forEach(f => {
+                        if(f !== this && f.hp > 0 && Math.hypot(f.x - this.x, f.y - this.y) < 170) {
+                            let dmg = Math.round(65 * this.getDamageMultiplier());
+                            f.hp -= dmg;
+                        }
+                    });
+                } else {
+                    // Vuurwapen (gun / orb) logica
+                    this.attackCooldown = w.id === 'god_blaster' ? 18 : (w.id === 'bazooka' ? 40 : (w.id === 'laser_sniper' ? 50 : 25));
+                    let angle = Math.atan2(target.y - this.y, target.x - this.x);
+                    let isOrb = w.type === 'orb';
+
+                    bullets.push({
+                        x: this.x, y: this.y,
+                        startX: this.x, startY: this.y,
+                        vx: Math.cos(angle) * (isOrb ? 15 : 22),
+                        vy: Math.sin(angle) * (isOrb ? 15 : 22),
+                        damage: Math.round((w.id === 'god_blaster' ? 180 : (w.id === 'laser_sniper' ? 110 : (w.id === 'bazooka' ? 80 : 35))) * this.getDamageMultiplier()),
+                        isOrb: isOrb,
+                        maxRange: w.id === 'laser_sniper' ? 1200 : (w.id === 'bazooka' ? 900 : 700),
+                        shooter: this
+                    });
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius + 6, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = 0.25;
+                ctx.fill();
+                ctx.restore();
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#0b0f19';
+                ctx.lineWidth = 3.5;
+                ctx.strokeStyle = this.color;
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 12;
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(this.x + this.facing * 8, this.y - 4, 4.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+                ctx.restore();
+
+                ctx.save();
+                let barW = 44, barH = 6;
+                ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                ctx.fillRect(this.x - barW/2, this.y - this.radius - 16, barW, barH);
+                ctx.fillStyle = this.isPlayer ? '#00f0ff' : '#ef4444';
+                ctx.fillRect(this.x - barW/2, this.y - this.radius - 16, barW * (Math.max(0, this.hp) / this.maxHp), barH);
+                ctx.restore();
+            }
+        }
+
+        window.addEventListener('keydown', e => {
+            keys[e.code] = true;
+            if(e.code === keybinds.dash && player && player.dashCooldown === 0) {
+                player.dashCooldown = 45;
+                player.x += player.facing * 160;
+            }
+        });
+        window.addEventListener('keyup', e => keys[e.code] = false);
+
+        window.addEventListener('mousemove', e => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+        window.addEventListener('mousedown', () => mousedown = true);
+        window.addEventListener('mouseup', () => mousedown = false);
+
+        window.selectGameMode = function(mode) {
+            selectedGameMode = mode;
+            serverMode = mode;
+            document.getElementById('btn-mode-ffa').className = mode === 'ffa' ? 'py-2.5 rounded-xl font-orbitron font-bold text-xs bg-cyan-500 text-slate-950 transition' : 'py-2.5 rounded-xl font-orbitron font-bold text-xs bg-slate-900 text-gray-300 hover:bg-slate-800 border border-slate-700 transition';
+            document.getElementById('btn-mode-raid').className = mode === 'raid' ? 'py-2.5 rounded-xl font-orbitron font-bold text-xs bg-cyan-500 text-slate-950 transition' : 'py-2.5 rounded-xl font-orbitron font-bold text-xs bg-slate-900 text-gray-300 hover:bg-slate-800 border border-slate-700 transition';
+            document.getElementById('hud-match-title').innerText = mode === 'ffa' ? 'FREE FOR ALL (FFA)' : 'BOSS RAID (WAVE 1 / 1000)';
+        };
+
+        window.joinLobbyByCode = function() {
+            let code = document.getElementById('lobby-code-input').value.trim().toUpperCase();
+            if(code) {
+                currentLobbyCode = code;
+                document.getElementById('current-lobby-code').innerText = code;
+                document.getElementById('lobby-status-text').innerText = `Verbonden met Lobby: ${code}`;
+            }
+        };
+
+        window.openFriendsModal = function() {
+            document.getElementById('friends-modal').classList.remove('hidden');
+            renderFriends();
+        };
+        window.closeFriendsModal = function() {
+            document.getElementById('friends-modal').classList.add('hidden');
+        };
+
+        function renderFriends() {
+            let container = document.getElementById('friends-list-container');
+            container.innerHTML = '';
+            friendsList.forEach(f => {
+                let div = document.createElement('div');
+                div.className = 'bg-slate-900 border border-slate-800 p-3 rounded-xl flex justify-between items-center text-xs';
+                div.innerHTML = `
+                    <div>
+                        <div class="font-orbitron font-bold text-cyan-300">${f.name}</div>
+                        <div class="text-[10px] ${f.online ? 'text-emerald-400' : 'text-gray-500'}">${f.online ? 'Online' : 'Offline'}</div>
+                    </div>
+                    <div>
+                        ${f.online ? `<button type="button" onclick="inviteFriend('${f.name}')" class="cyber-button px-3 py-1.5 rounded-lg text-[10px]">INVITE</button>` : `<span class="text-gray-500 text-[10px]">Bezig</span>`}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        window.addFriend = function() {
+            let nameInput = document.getElementById('friend-name-input');
+            if(nameInput.value.trim()) {
+                friendsList.push({ name: nameInput.value.trim(), online: true, inLobby: false });
+                nameInput.value = '';
+                renderFriends();
+            }
+        };
+
+        window.inviteFriend = function(friendName) {
+            alert(`Uitnodiging verzonden naar ${friendName} voor lobby ${currentLobbyCode}!`);
+        };
+
+        window.startGame = function() {
+            document.getElementById('main-menu-modal').classList.add('hidden');
+            initGameSession();
+            gameActive = true;
+        };
+
+        window.openWeaponsModal = function() {
+            document.getElementById('weapons-modal').classList.remove('hidden');
+            renderShop();
+        };
+        window.closeWeaponsModal = function() {
+            document.getElementById('weapons-modal').classList.add('hidden');
+        };
+
+        window.openSettingsModal = function() {
+            document.getElementById('settings-modal').classList.remove('hidden');
+            document.getElementById('bind-attack').value = keybinds.attack;
+            document.getElementById('bind-dash').value = keybinds.dash;
+        };
+        window.closeSettingsModal = function() {
+            keybinds.attack = document.getElementById('bind-attack').value.trim() || 'KeyL';
+            keybinds.dash = document.getElementById('bind-dash').value.trim() || 'Space';
+            document.getElementById('settings-modal').classList.add('hidden');
+        };
+
+        window.switchShopTab = function(tab) {
+            if(tab === 'weapons') {
+                document.getElementById('tab-weapons-btn').className = 'font-orbitron font-bold text-lg text-cyan-400 border-b-2 border-cyan-400 pb-1 cursor-pointer';
+                document.getElementById('tab-skins-btn').className = 'font-orbitron font-bold text-lg text-gray-400 pb-1 cursor-pointer hover:text-cyan-300';
+                document.getElementById('shop-weapons-container').classList.remove('hidden');
+                document.getElementById('shop-skins-container').classList.add('hidden');
+            } else {
+                document.getElementById('tab-skins-btn').className = 'font-orbitron font-bold text-lg text-cyan-400 border-b-2 border-cyan-400 pb-1 cursor-pointer';
+                document.getElementById('tab-weapons-btn').className = 'font-orbitron font-bold text-lg text-gray-400 pb-1 cursor-pointer hover:text-cyan-300';
+                document.getElementById('shop-skins-container').classList.remove('hidden');
+                document.getElementById('shop-weapons-container').classList.add('hidden');
+                renderSkins();
+            }
+        };
+
+        function renderShop() {
+            document.getElementById('shop-coins-display').innerText = `${playerCoins} 🪙`;
+            const container = document.getElementById('shop-weapons-container');
+            container.innerHTML = '';
+
+            weaponsList.forEach(w => {
+                let isUnlocked = w.unlocked || (serverMode === 'sandbox') || (w.requirement === '500_kills' && totalKills >= 500) || (w.requirement === 'wave_1000' && currentWave >= 1000);
+                let isSelected = currentWeaponId === w.id;
+
+                let div = document.createElement('div');
+                div.className = 'bg-slate-900 border border-slate-800 p-4 rounded-2xl flex justify-between items-center';
+                div.innerHTML = `
+                    <div>
+                        <div class="font-orbitron font-bold text-sm text-cyan-300">${w.name}</div>
+                        <div class="text-xs text-gray-400 mt-0.5">${w.desc}</div>
+                    </div>
+                    <div>
+                        ${isUnlocked ? `
+                            <button type="button" onclick="selectWeapon('${w.id}')" class="px-4 py-2 rounded-xl text-xs font-orbitron font-bold ${isSelected ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-cyan-300 hover:bg-slate-700'}">
+                                ${isSelected ? 'GEACTIVEERD' : 'SELECTEER'}
+                            </button>
+                        ` : `
+                            <button type="button" onclick="buyWeapon('${w.id}')" class="cyber-button px-4 py-2 rounded-xl text-xs">
+                                ${w.price === 9999 ? '🔒 500 KILLS' : (w.price === 99999 ? '🔒 WAVE 1000' : w.price + ' 🪙')}
+                            </button>
+                        `}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        window.selectWeapon = function(id) {
+            currentWeaponId = id;
+            renderShop();
+            let w = weaponsList.find(i => i.id === id);
+            if(player) player.weaponType = w.type;
+            document.getElementById('hud-player-name').innerText = `PLAYER (${w.name.toUpperCase()})`;
+        };
+
+        window.buyWeapon = function(id) {
+            let w = weaponsList.find(i => i.id === id);
+            if(w.requirement === '500_kills' || w.requirement === 'wave_1000') return;
+            if(playerCoins >= w.price) {
+                playerCoins -= w.price;
+                w.unlocked = true;
+                selectWeapon(id);
+                renderShop();
+            }
+        };
+
+        function renderSkins() {
+            const container = document.getElementById('shop-skins-container');
+            container.innerHTML = '';
+
+            skinsList.forEach(s => {
+                let isSelected = activeSkin === s.id;
+                let div = document.createElement('div');
+                div.className = 'bg-slate-900 border border-slate-800 p-4 rounded-2xl flex justify-between items-center';
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-6 h-6 rounded-full border border-white/20" style="background: ${s.color};"></div>
+                        <div>
+                            <div class="font-orbitron font-bold text-sm text-cyan-300">${s.name}</div>
+                            <div class="text-xs text-gray-400">Skin & Camo</div>
+                        </div>
+                    </div>
+                    <div>
+                        ${s.unlocked ? `
+                            <button type="button" onclick="selectSkin('${s.id}')" class="px-4 py-2 rounded-xl text-xs font-orbitron font-bold ${isSelected ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-cyan-300'}">
+                                ${isSelected ? 'ACTIEF' : 'KIES'}
+                            </button>
+                        ` : `
+                            <button type="button" onclick="buySkin('${s.id}')" class="cyber-button px-4 py-2 rounded-xl text-xs">${s.price} 🪙</button>
+                        `}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        window.selectSkin = function(id) {
+            activeSkin = id;
+            let s = skinsList.find(i => i.id === id);
+            if(player) player.color = s.color;
+            renderSkins();
+        };
+
+        window.buySkin = function(id) {
+            let s = skinsList.find(i => i.id === id);
+            if(playerCoins >= s.price) {
+                playerCoins -= s.price;
+                s.unlocked = true;
+                selectSkin(id);
+                renderSkins();
+            }
+        };
+
+        window.applyKillUpgrade = function(type) {
+            if(!player) return;
+            if(type === 'damage') {
+                player.damageBonus += 0.25;
+            } else if(type === 'speed') {
+                player.speed += 1.0;
+            } else if(type === 'heal') {
+                player.baseMaxHp += 30;
+                player.maxHp = player.baseMaxHp;
+                player.hp = player.maxHp;
+            } else if(type === 'coins') {
+                playerCoins += 100;
+            }
+
+            document.getElementById('per-kill-upgrade-modal').classList.add('hidden');
+            pendingUpgradeChoices = false;
+            gameActive = true;
+        };
+
+        window.respawnPlayer = function() {
+            document.getElementById('game-over-modal').classList.add('hidden');
+            if(player) {
+                player.hp = player.maxHp;
+                player.x = Math.random() * (MAP_WIDTH - 500) + 250;
+                player.y = Math.random() * (MAP_HEIGHT - 500) + 250;
+            }
+            currentPotKills = 0;
+            gameActive = true;
+        };
+
+        window.returnToMainMenu = function() {
+            document.getElementById('game-over-modal').classList.add('hidden');
+            document.getElementById('main-menu-modal').classList.remove('hidden');
+            gameActive = false;
+        };
+
+        function initGameSession() {
+            players = [];
+            bullets = [];
+            currentPotKills = 0;
+            currentWave = 1;
+
+            player = new Fighter(true, '#00f0ff', 'Player', weaponsList.find(w => w.id === currentWeaponId).type);
+            players.push(player);
+
+            let botCount = (selectedGameMode === 'raid') ? 5 : 6;
+            for(let i=0; i<botCount; i++) {
+                players.push(new Fighter(false, '#ef4444', `Bot ${i+1}`, 'gun'));
+            }
+        }
+
+        function triggerAnnouncement(text) {
+            let el = document.getElementById('announcement');
+            el.innerText = text;
+            el.style.opacity = '1';
+            setTimeout(() => el.style.opacity = '0', 1600);
+        }
+
+        function gameLoop() {
+            requestAnimationFrame(gameLoop);
+
+            if(!gameActive || pendingUpgradeChoices) return;
+
+            cameraX += (player.x - canvas.width/2 - cameraX) * 0.1;
+            cameraY += (player.y - canvas.height/2 - cameraY) * 0.1;
+            cameraX = Math.max(0, Math.min(MAP_WIDTH - canvas.width, cameraX));
+            cameraY = Math.max(0, Math.min(MAP_HEIGHT - canvas.height, cameraY));
+
+            ctx.save();
+            ctx.translate(-cameraX, -cameraY);
+
+            ctx.fillStyle = '#050811';
+            ctx.fillRect(cameraX, cameraY, canvas.width, canvas.height);
+
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1.5;
+            let gridSize = 80;
+            let startX = Math.floor(cameraX / gridSize) * gridSize;
+            let startY = Math.floor(cameraY / gridSize) * gridSize;
+            for(let x = startX; x < cameraX + canvas.width + gridSize; x += gridSize) {
+                ctx.beginPath(); ctx.moveTo(x, cameraY); ctx.lineTo(x, cameraY + canvas.height); ctx.stroke();
+            }
+            for(let y = startY; y < cameraY + canvas.height + gridSize; y += gridSize) {
+                ctx.beginPath(); ctx.moveTo(cameraX, y); ctx.lineTo(cameraX + canvas.width, y); ctx.stroke();
+            }
+
+            for(let i = bullets.length - 1; i >= 0; i--) {
+                let b = bullets[i];
+                b.x += b.vx;
+                b.y += b.vy;
+
+                // Controleer of de kogel zijn maximale bereik heeft overschreden (geen infinite range)
+                let traveledDist = Math.hypot(b.x - b.startX, b.y - b.startY);
+                if(traveledDist > b.maxRange) {
+                    bullets.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.isOrb ? 8 : 4.5, 0, Math.PI * 2);
+                ctx.fillStyle = b.isOrb ? '#38bdf8' : '#facc15';
+                ctx.shadowColor = ctx.fillStyle;
+                ctx.shadowBlur = 12;
+                ctx.fill();
+                ctx.restore();
+
+                players.forEach(f => {
+                    let canHit = (serverMode === 'ffa') ? (f !== b.shooter) : (f !== b.shooter && (f.isPlayer !== b.shooter.isPlayer));
+                    if(canHit && f.hp > 0 && Math.hypot(f.x - b.x, f.y - b.y) < f.radius + 6) {
+                        f.hp -= b.damage;
+                        bullets.splice(i, 1);
+
+                        if(f.hp <= 0 && b.shooter === player) {
+                            currentPotKills++;
+                            totalKills++;
+                            playerCoins += 25;
+
+                            if(selectedGameMode === 'raid') {
+                                currentWave++;
+                                document.getElementById('hud-match-title').innerText = `BOSS RAID (WAVE ${currentWave} / 1000)`;
+                                if(currentWave >= 1000) {
+                                    triggerAnnouncement("🏆 WAVE 1000 BEREIKT! GOD BLASTER UNLOCKED!");
+                                    weaponsList.find(w => w.id === 'god_blaster').unlocked = true;
+                                }
+                            }
+
+                            f.hp = f.maxHp;
+                            f.x = Math.random() * (MAP_WIDTH - 500) + 250;
+                            f.y = Math.random() * (MAP_HEIGHT - 500) + 250;
+
+                            gameActive = false;
+                            pendingUpgradeChoices = true;
+                            document.getElementById('per-kill-upgrade-modal').classList.remove('hidden');
+                        }
+                    }
+                });
+
+                if(b && (b.x < 0 || b.x > MAP_WIDTH || b.y < 0 || b.y > MAP_HEIGHT)) {
+                    bullets.splice(i, 1);
+                }
+            }
+
+            players.forEach(f => {
+                f.update(players);
+                f.draw();
+            });
+
+            if(player.hp <= 0) {
+                gameActive = false;
+                document.getElementById('game-over-pot-kills').innerText = currentPotKills;
+                document.getElementById('game-over-total-kills').innerText = totalKills;
+                document.getElementById('game-over-modal').classList.remove('hidden');
+            }
+
+            ctx.restore();
+
+            document.getElementById('hud-hp-fill').style.width = `${Math.max(0, (player.hp / player.maxHp) * 100)}%`;
+            document.getElementById('hud-hp-text').innerText = `${Math.round(player.hp)} / ${player.maxHp}`;
+            document.getElementById('hud-coins').innerText = `${playerCoins} 🪙`;
+            document.getElementById('hud-total-kills').innerText = totalKills;
+        }
+
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
