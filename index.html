@@ -316,11 +316,11 @@
                     let worldMouseX = mouseX + cameraX;
                     let worldMouseY = mouseY + cameraY;
 
-                    // Als we op mobiel spelen en de joystick gebruiken, richt Shiftlock direct strak op de beweegrichting van het rondje of dichtstbijzijnde vijand
-                    let nearest = targets.filter(t => t !== this && t.hp > 0).sort((a, b) => Math.hypot(a.x - this.x, a.y - this.y) - Math.hypot(b.x - this.x, b.y - this.y))[0];
-                    
-                    if(isTouchDevice && (joystickMove.x !== 0 || joystickMove.y !== 0)) {
-                        // Richt op de richting van het touch-rondje of vijand
+                    // Alleen de mobiele touch-richting gebruiken als de speler daadwerkelijk het touch-rondje of de vuurknop op het scherm gebruikt!
+                    let isUsingMobileTouch = (joystickMove.x !== 0 || joystickMove.y !== 0 || mobileAttackPressed);
+
+                    if(isUsingMobileTouch) {
+                        let nearest = targets.filter(t => t !== this && t.hp > 0).sort((a, b) => Math.hypot(a.x - this.x, a.y - this.y) - Math.hypot(b.x - this.x, b.y - this.y))[0];
                         if(nearest && Math.hypot(nearest.x - this.x, nearest.y - this.y) < 600) {
                             worldMouseX = nearest.x;
                             worldMouseY = nearest.y;
@@ -328,10 +328,6 @@
                             worldMouseX = this.x + Math.cos(this.lastMoveAngle) * 200;
                             worldMouseY = this.y + Math.sin(this.lastMoveAngle) * 200;
                         }
-                    } else if(isTouchDevice && nearest) {
-                        // Als je stilstaat op mobiel, richt automatisch op dichtstbijzijnde vijand
-                        worldMouseX = nearest.x;
-                        worldMouseY = nearest.y;
                     }
 
                     this.aimAngle = Math.atan2(worldMouseY - this.y, worldMouseX - this.x);
